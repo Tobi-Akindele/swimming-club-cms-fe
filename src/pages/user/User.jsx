@@ -13,6 +13,9 @@ import {
   faPhone,
   faLocationDot,
   faUpload,
+  faPerson,
+  faCheck,
+  faTriangleExclamation,
 } from '@fortawesome/free-solid-svg-icons';
 import moment from 'moment';
 import { format } from 'timeago.js';
@@ -221,6 +224,10 @@ const User = () => {
                     {'(' + calculateAge(user.dateOfBirth) + ' years)'}
                   </UserShowInfoTitle>
                 </UserShowInfo>
+                <UserShowInfo>
+                  <FontAwesomeIcon icon={faPerson} style={userShowIcon} />
+                  <UserShowInfoTitle>{user.gender}</UserShowInfoTitle>
+                </UserShowInfo>
 
                 <UserShowTitle>Contact Details</UserShowTitle>
                 <UserShowInfo>
@@ -239,7 +246,42 @@ const User = () => {
                 <UserShowTitle>Registered</UserShowTitle>
                 <UserShowInfo>
                   <FontAwesomeIcon icon={faPen} style={userShowIcon} />
-                  <UserShowInfoTitle>{format(user._created)}</UserShowInfoTitle>
+                  <UserShowInfoTitle>
+                    {format(user._created)}{' '}
+                  </UserShowInfoTitle>
+                </UserShowInfo>
+                <UserShowInfo>
+                  <FontAwesomeIcon /> Status
+                  <UserShowInfoTitle>
+                    <span
+                      style={{
+                        border: `1px solid ${user.active ? 'green' : 'red'}`,
+                        width: '70px',
+                        textAlign: 'center',
+                        borderRadius: '10px',
+                        padding: '10px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {user.active ? (
+                        <>
+                          <FontAwesomeIcon
+                            icon={faCheck}
+                            style={{ color: '#3bb077' }}
+                          />{' '}
+                          Active
+                        </>
+                      ) : (
+                        <>
+                          <FontAwesomeIcon
+                            icon={faTriangleExclamation}
+                            style={{ color: 'red' }}
+                          />{' '}
+                          Inactive
+                        </>
+                      )}
+                    </span>
+                  </UserShowInfoTitle>
                 </UserShowInfo>
               </UserShowBottom>
             </UserShow>

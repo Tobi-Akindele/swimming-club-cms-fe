@@ -15,6 +15,11 @@ import { openRequest } from '../../apiRequests';
 import { format } from 'timeago.js';
 import { Link } from 'react-router-dom';
 import { setAuthToken } from '../../utils';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faCheck,
+  faTriangleExclamation,
+} from '@fortawesome/free-solid-svg-icons';
 
 const Container = styled.div`
   display: flex;
@@ -52,9 +57,11 @@ const ButtonEdit = styled.button`
 const CreateUserContainer = styled.div`
   display: flex;
   align-items: center;
-  justify-content: end;
+  justify-content: space-between;
   margin-bottom: 5px;
 `;
+
+const CreateUserContainerTitle = styled.h1``;
 
 const ButtonCreate = styled.button`
   border: none;
@@ -86,12 +93,14 @@ const Users = () => {
       });
   }, [dispatch, currentUser]);
 
-  const rows = users && Object.entries(users).map(([k, v]) => {
-    return {
-      ...v,
-      id: users[k]._id,
-    };
-  });
+  const rows =
+    users &&
+    Object.entries(users).map(([k, v]) => {
+      return {
+        ...v,
+        id: users[k]._id,
+      };
+    });
 
   const columns = [
     {
@@ -102,7 +111,7 @@ const Users = () => {
     {
       field: 'user',
       headerName: 'User',
-      width: 250,
+      width: 220,
       renderCell: (params) => {
         return (
           <UserCellContainer>
@@ -135,15 +144,48 @@ const Users = () => {
     {
       field: 'userType',
       headerName: 'User Type',
-      width: 150,
+      width: 100,
       renderCell: (params) => {
         return <span>{params.row.userType.name}</span>;
       },
     },
     {
+      field: 'activated',
+      headerName: 'Activated',
+      width: 100,
+      renderCell: (params) => {
+        return (
+          <span
+            style={{
+              border: `1px solid ${params.row.active ? 'green' : 'red'}`,
+              width: '70px',
+              textAlign: 'center',
+              borderRadius: '10px',
+              padding: '1px',
+            }}
+          >
+            {params.row.active ? (
+              <>
+                <FontAwesomeIcon icon={faCheck} style={{ color: '#3bb077' }} />{' '}
+                Active
+              </>
+            ) : (
+              <>
+                <FontAwesomeIcon
+                  icon={faTriangleExclamation}
+                  style={{ color: 'red' }}
+                />{' '}
+                Inactive
+              </>
+            )}
+          </span>
+        );
+      },
+    },
+    {
       field: 'action',
       headerName: 'Action',
-      width: 150,
+      width: 100,
       renderCell: (params) => {
         return (
           <>
@@ -174,11 +216,12 @@ const Users = () => {
         <Sidebar />
         <UsersContainer>
           <CreateUserContainer>
+            <CreateUserContainerTitle>Users</CreateUserContainerTitle>
             <Link to='/create/user'>
-              <ButtonCreate>Create User</ButtonCreate>
+              <ButtonCreate>Create</ButtonCreate>
             </Link>
           </CreateUserContainer>
-          <DataGrid rows={rows} columns={columns} autoHeight />
+          <DataGrid rows={rows} columns={columns} autoHeight pageSize={10} />
         </UsersContainer>
       </Container>
     </>

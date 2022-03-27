@@ -7,6 +7,7 @@ import {
   faRightToBracket,
   faMedal,
   faUsers,
+  faIdBadge,
 } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch } from 'react-redux';
 import { logoutFailure, logoutSuccess } from '../../redux/loginRedux';
@@ -104,6 +105,12 @@ const Sidebar = () => {
               <SidebarListItem>
                 <FontAwesomeIcon style={sidebarIconStyles} icon={faUsers} />
                 Users
+              </SidebarListItem>
+            </Link>
+            <Link to='/user-types' className='link'>
+              <SidebarListItem>
+                <FontAwesomeIcon style={sidebarIconStyles} icon={faIdBadge} />
+                Users Types
               </SidebarListItem>
             </Link>
           </SidebarList>

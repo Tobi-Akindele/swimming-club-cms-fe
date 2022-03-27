@@ -12,6 +12,7 @@ import Login from './pages/login/Login';
 import SetPassword from './pages/setPassword/SetPassword';
 import User from './pages/user/User';
 import Users from './pages/users/Users';
+import UserTypes from './pages/userTypes/UserTypes';
 
 const App = () => {
   const { currentUser } = useSelector((state) => state.login);
@@ -37,6 +38,10 @@ const App = () => {
         <Route
           path='/create/user'
           element={currentUser ? <CreateUser /> : <Navigate to='/' />}
+        />
+        <Route
+          path='/user-types'
+          element={currentUser ? <UserTypes /> : <Navigate to='/' />}
         />
         <Route path='/set-password/:activationCode' element={<SetPassword />} />
       </Routes>
