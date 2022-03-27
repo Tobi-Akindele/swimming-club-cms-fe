@@ -122,7 +122,7 @@ const SetPassword = () => {
                 dispatch(setPasswordSuccess(result.data));
                 setTimeout(() => {
                   navigate('/', { replace: true });
-                }, 5000);
+                }, 4000);
                 toast.success(result.data?.message);
               })
               .catch((err) => {
@@ -154,7 +154,7 @@ const SetPassword = () => {
                     type='submit'
                     disabled={!formik.dirty || !formik.isValid}
                   >
-                    SUBMIT
+                    SUBMIT{' '}
                     {loading && <FontAwesomeIcon icon={faSpinner} spin />}
                   </Button>
                 </ButtonContainer>

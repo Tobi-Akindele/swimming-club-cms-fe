@@ -46,6 +46,19 @@ const userSlice = createSlice({
       state.isFetchingEmail = false;
       state.error = true;
     },
+    //Register User
+    registerUserStart: (state) => {
+      state.isFetching = true;
+      state.error = false;
+    },
+    registerUserSuccess: (state, action) => {
+      state.isFetching = false;
+      state.users.push(action.payload);
+    },
+    registerUserFailure: (state) => {
+      state.isFetching = false;
+      state.error = true;
+    },
   },
 });
 
@@ -59,6 +72,9 @@ export const {
   getUserByEmailStart,
   getUserByEmailSuccess,
   getUserByEmailFailure,
+  registerUserStart,
+  registerUserSuccess,
+  registerUserFailure,
 } = userSlice.actions;
 
 export default userSlice.reducer;

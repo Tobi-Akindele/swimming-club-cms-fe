@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { ToastContainer } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import styled from 'styled-components';
 import { openRequest } from '../../apiRequests';
 import Sidebar from '../../components/sidebar/Sidebar';
@@ -12,6 +12,9 @@ import {
   getUserByUsernameFailure,
   getUserByUsernameStart,
   getUserByUsernameSuccess,
+  registerUserFailure,
+  registerUserStart,
+  registerUserSuccess,
 } from '../../redux/userRedux';
 import * as Yup from 'yup';
 import { Form, Formik } from 'formik';
@@ -37,6 +40,8 @@ import {
   getDownloadURL,
 } from 'firebase/storage';
 import app from '../../firebase';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 const Container = styled.div`
   display: flex;
@@ -110,6 +115,7 @@ const CreateUser = () => {
   const { roles, isFetching: isFetchingRoles } = useSelector(
     (state) => state?.role
   );
+  const { isFetching: isCreatingUser } = useSelector((state) => state?.user);
   const dispatch = useDispatch();
 
   function isUniqueUsername(eMessage) {
@@ -190,7 +196,7 @@ const CreateUser = () => {
       .max(40, 'Too long')
       .required('Last name is required'),
     dateOfBirth: Yup.string().required('Date of Birth is required'),
-    admin: Yup.bool().required('Required'),
+    isAdmin: Yup.bool().required('Required'),
     userTypeId: Yup.string().required('Required'),
     roleId: Yup.string().required('Required'),
     gender: Yup.string().required('Required'),
@@ -262,14 +268,13 @@ const CreateUser = () => {
                   dateOfBirth: '',
                   phoneNumber: '',
                   address: '',
-                  admin: '',
+                  isAdmin: '',
                   userTypeId: '',
                   roleId: '',
                   gender: '',
                 }}
                 validationSchema={validate}
-                onSubmit={(values) => {
-                  console.log(values);
+                onSubmit={(values, { resetForm }) => {
                   const fileName = new Date().getTime() + file.name;
                   const storage = getStorage(app);
                   const storageRef = ref(storage, fileName);
@@ -290,8 +295,27 @@ const CreateUser = () => {
                           const user = {
                             ...values,
                             image: downloadURL,
+                            admin: Boolean(values.admin),
                           };
-                          console.log(user);
+                          dispatch(registerUserStart());
+                          openRequest
+                            .post(
+                              '/signup',
+                              user,
+                              setAuthToken(currentUser.accessToken)
+                            )
+                            .then((result) => {
+                              resetForm({});
+                              dispatch(registerUserSuccess(result.data));
+                              toast.success('Registration successful');
+                            })
+                            .catch((err) => {
+                              let message = err.response?.data?.message
+                                ? err.response?.data?.message
+                                : err.message;
+                              toast.error(message);
+                              dispatch(registerUserFailure());
+                            });
                         }
                       );
                     }
@@ -313,6 +337,18 @@ const CreateUser = () => {
 
                     {/* Bottom */}
                     <UserUpdateLeft>
+                      <Select
+                        label='User Type'
+                        name='userTypeId'
+                        options={userTypes}
+                        loading={isFetchingUserTypes}
+                      />
+                      <Select
+                        label='User Role'
+                        name='roleId'
+                        options={roles}
+                        loading={isFetchingRoles}
+                      />
                       <TextField
                         name='username'
                         type='text'
@@ -362,7 +398,7 @@ const CreateUser = () => {
                       />
                       <Radio
                         label='Admin'
-                        name='admin'
+                        name='isAdmin'
                         options={adminOptions}
                       />
                       <Radio
@@ -370,25 +406,18 @@ const CreateUser = () => {
                         name='gender'
                         options={genderOptions}
                       />
-                      <Select
-                        label='User Type'
-                        name='userTypeId'
-                        options={userTypes}
-                        loading={isFetchingUserTypes}
-                      />
-                      <Select
-                        label='User Role'
-                        name='roleId'
-                        options={roles}
-                        loading={isFetchingRoles}
-                      />
                     </UserUpdateLeft>
                     <RegContainer>
                       <ButtonUpdate
                         type='submit'
-                        disabled={!formik.dirty || !formik.isValid}
+                        disabled={
+                          !formik.dirty || !formik.isValid || isCreatingUser
+                        }
                       >
-                        Register
+                        REGISTER{' '}
+                        {isCreatingUser && (
+                          <FontAwesomeIcon icon={faSpinner} spin />
+                        )}
                       </ButtonUpdate>
                     </RegContainer>
                   </Form>

@@ -124,8 +124,7 @@ const Login = () => {
               {!isFetching && <Button onClick={handleLogin}>LOGIN</Button>}
               {isFetching && (
                 <Button onClick={handleLogin} disabled>
-                  LOADING
-                  <FontAwesomeIcon icon={faSpinner} spin />
+                  LOADING <FontAwesomeIcon icon={faSpinner} spin />
                 </Button>
               )}
             </ButtonContainer>
