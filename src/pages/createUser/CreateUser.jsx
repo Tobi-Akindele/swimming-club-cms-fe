@@ -299,101 +299,99 @@ const CreateUser = () => {
                 }}
               >
                 {(formik) => (
-                  <>
-                    <Form>
-                      {/* Top */}
-                      <UserUpdateRight>
-                        <TextField
-                          name='file'
-                          type='file'
-                          label='Image'
-                          accept='image/png, image/jpeg, image/jpg'
-                          onChange={(e) => setFile(e.target.files[0])}
-                        />
-                      </UserUpdateRight>
+                  <Form>
+                    {/* Top */}
+                    <UserUpdateRight>
+                      <TextField
+                        name='file'
+                        type='file'
+                        label='Image'
+                        accept='image/png, image/jpeg, image/jpg'
+                        onChange={(e) => setFile(e.target.files[0])}
+                      />
+                    </UserUpdateRight>
 
-                      {/* Bottom */}
-                      <UserUpdateLeft>
-                        <TextField
-                          name='username'
-                          type='text'
-                          placeholder='john.doe123'
-                          label='Username'
-                        />
-                        <TextField
-                          name='email'
-                          type='email'
-                          placeholder='john.doe@example.com'
-                          label='Email'
-                        />
-                        <TextField
-                          name='firstName'
-                          type='text'
-                          placeholder='John'
-                          label='First Name'
-                        />
-                        <TextField
-                          name='lastName'
-                          type='text'
-                          placeholder='Doe'
-                          label='Last Name'
-                        />
-                        <TextField
-                          name='middleName'
-                          type='text'
-                          placeholder='Smith'
-                          label='Middle Name'
-                        />
-                        <TextField
-                          name='dateOfBirth'
-                          type='date'
-                          label='Date of Birth'
-                        />
-                        <TextField
-                          name='phoneNumber'
-                          type='text'
-                          placeholder='+447123456789'
-                          label='Phone Number'
-                        />
-                        <TextField
-                          name='address'
-                          type='text'
-                          placeholder='1, Fake st, Fake Town, AQ8 9QT | UK'
-                          label='Address'
-                        />
-                        <Radio
-                          label='Admin'
-                          name='admin'
-                          options={adminOptions}
-                        />
-                        <Radio
-                          label='Gender'
-                          name='gender'
-                          options={genderOptions}
-                        />
-                        <Select
-                          label='User Type'
-                          name='userTypeId'
-                          options={userTypes}
-                          loading={isFetchingUserTypes}
-                        />
-                        <Select
-                          label='User Role'
-                          name='roleId'
-                          options={roles}
-                          loading={isFetchingRoles}
-                        />
-                      </UserUpdateLeft>
-                      <RegContainer>
-                        <ButtonUpdate
-                          type='submit'
-                          disabled={!formik.dirty || !formik.isValid}
-                        >
-                          Register
-                        </ButtonUpdate>
-                      </RegContainer>
-                    </Form>
-                  </>
+                    {/* Bottom */}
+                    <UserUpdateLeft>
+                      <TextField
+                        name='username'
+                        type='text'
+                        placeholder='john.doe123'
+                        label='Username'
+                      />
+                      <TextField
+                        name='email'
+                        type='email'
+                        placeholder='john.doe@example.com'
+                        label='Email'
+                      />
+                      <TextField
+                        name='firstName'
+                        type='text'
+                        placeholder='John'
+                        label='First Name'
+                      />
+                      <TextField
+                        name='lastName'
+                        type='text'
+                        placeholder='Doe'
+                        label='Last Name'
+                      />
+                      <TextField
+                        name='middleName'
+                        type='text'
+                        placeholder='Smith'
+                        label='Middle Name'
+                      />
+                      <TextField
+                        name='dateOfBirth'
+                        type='date'
+                        label='Date of Birth'
+                      />
+                      <TextField
+                        name='phoneNumber'
+                        type='text'
+                        placeholder='+447123456789'
+                        label='Phone Number'
+                      />
+                      <TextField
+                        name='address'
+                        type='text'
+                        placeholder='1, Fake st, Fake Town, AQ8 9QT | UK'
+                        label='Address'
+                      />
+                      <Radio
+                        label='Admin'
+                        name='admin'
+                        options={adminOptions}
+                      />
+                      <Radio
+                        label='Gender'
+                        name='gender'
+                        options={genderOptions}
+                      />
+                      <Select
+                        label='User Type'
+                        name='userTypeId'
+                        options={userTypes}
+                        loading={isFetchingUserTypes}
+                      />
+                      <Select
+                        label='User Role'
+                        name='roleId'
+                        options={roles}
+                        loading={isFetchingRoles}
+                      />
+                    </UserUpdateLeft>
+                    <RegContainer>
+                      <ButtonUpdate
+                        type='submit'
+                        disabled={!formik.dirty || !formik.isValid}
+                      >
+                        Register
+                      </ButtonUpdate>
+                    </RegContainer>
+                  </Form>
                 )}
               </Formik>
             </UserUpdateContainer>

@@ -18,11 +18,6 @@ const UserUpdateItemInput = styled.input`
     props.hasError ? '1px solid red' : '1px solid grey'};
 `;
 
-// const error = {
-//   color: 'red',
-//   fontSize: '0.8rem',
-// };
-
 const TextField = ({ ...props }) => {
   const [field, meta] = useField(props);
 

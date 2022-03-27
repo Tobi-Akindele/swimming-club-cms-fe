@@ -9,6 +9,7 @@ import './App.css';
 import CreateUser from './pages/createUser/CreateUser';
 import Dashboard from './pages/dashboard/Dashboard';
 import Login from './pages/login/Login';
+import SetPassword from './pages/setPassword/SetPassword';
 import User from './pages/user/User';
 import Users from './pages/users/Users';
 
@@ -37,6 +38,7 @@ const App = () => {
           path='/create/user'
           element={currentUser ? <CreateUser /> : <Navigate to='/' />}
         />
+        <Route path='/set-password/:activationCode' element={<SetPassword />} />
       </Routes>
     </Router>
   );
