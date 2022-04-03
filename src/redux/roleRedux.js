@@ -20,10 +20,61 @@ const roleSlice = createSlice({
       state.isFetching = false;
       state.error = true;
     },
+    //Get Role by Name
+    getRoleByNameStart: (state) => {
+      state.isFetchingByName = true;
+      state.error = false;
+    },
+    getRoleByNameSuccess: (state, action) => {
+      state.isFetchingByName = false;
+      state.name = action.payload;
+    },
+    getRoleByNameFailure: (state) => {
+      state.isFetchingByName = false;
+      state.error = true;
+    },
+    //Create Role
+    createRoleStart: (state) => {
+      state.isFetching = true;
+      state.error = false;
+    },
+    createRoleSuccess: (state, action) => {
+      state.isFetching = false;
+      state.roles.push(action.payload);
+    },
+    createRoleFailure: (state) => {
+      state.isFetching = false;
+      state.error = true;
+    },
+    //Get Role by ID
+    getRoleByIdStart: (state) => {
+      state.isFetching = true;
+      state.error = false;
+    },
+    getRoleByIdSuccess: (state, action) => {
+      state.isFetching = false;
+      state.role = action.payload;
+    },
+    getRoleByIdFailure: (state) => {
+      state.isFetching = false;
+      state.error = true;
+    },
   },
 });
 
-export const { getRolesStart, getRolesSuccess, getRolesFailure } =
-  roleSlice.actions;
+export const {
+  getRolesStart,
+  getRolesSuccess,
+  getRolesFailure,
+  getRoleByNameStart,
+  getRoleByNameSuccess,
+  getRoleByNameFailure,
+  createRoleStart,
+  createRoleSuccess,
+  createRoleFailure,
+  getRoleByIdStart,
+  getRoleByIdSuccess,
+  getRoleByIdFailure,
+} = roleSlice.actions;
 
 export default roleSlice.reducer;

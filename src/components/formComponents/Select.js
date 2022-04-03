@@ -20,7 +20,7 @@ const selectStyle = {
 };
 
 const Select = (props) => {
-  const { label, name, options, loading, ...others } = props;
+  const { label, name, options, loading, value, ...others } = props;
   return (
     <UserUpdateItem>
       <Label htmlFor={name}>{label}</Label>
@@ -31,6 +31,7 @@ const Select = (props) => {
         name={name}
         {...others}
         disabled={loading}
+        value={value}
       >
         <option key={0} value={''} disabled={true}>
           {'Select an option'}

@@ -12,14 +12,16 @@ import {
   faPen,
   faPhone,
   faLocationDot,
-  faUpload,
   faPerson,
   faCheck,
   faTriangleExclamation,
+  faSpinner,
 } from '@fortawesome/free-solid-svg-icons';
 import moment from 'moment';
 import { format } from 'timeago.js';
 import { calculateAge } from '../../utils';
+import TextField from '../../components/formComponents/TextField';
+import { Form, Formik } from 'formik';
 
 const Container = styled.div`
   display: flex;
@@ -115,35 +117,11 @@ const UserUpdateTitle = styled.span`
   font-weight: 600;
 `;
 
-const UserUpdateForm = styled.form`
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
-`;
-
 const UserUpdateLeft = styled.div`
   display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
   width: 80%;
-`;
-
-const UserUpdateItem = styled.div`
-  display: flex;
-  flex-direction: column;
-  margin: 10px;
-`;
-
-const UserUpdateItemLabel = styled.label`
-  margin-bottom: 5px;
-  font-size: 14px;
-`;
-
-const UserUpdateItemInput = styled.input`
-  border: none;
-  width: 250px;
-  height: 30px;
-  border-bottom: 1px solid gray;
 `;
 
 const UserUpdateRight = styled.div`
@@ -152,23 +130,6 @@ const UserUpdateRight = styled.div`
   justify-content: space-between;
 `;
 
-const UserUpdateUpload = styled.div`
-  display: flex;
-  align-items: center;
-`;
-
-const UserUpdateImg = styled.img`
-  width: 100px;
-  height: 100px;
-  border-radius: 10px;
-  object-fit: cover;
-  margin-right: 20px;
-`;
-
-const userUpdateIcon = {
-  cursor: 'pointer',
-};
-
 const ButtonUpdate = styled.button`
   border: none;
   padding: 10px;
@@ -176,6 +137,18 @@ const ButtonUpdate = styled.button`
   color: white;
   font-weight: 600;
   cursor: pointer;
+`;
+
+const UserUpdateContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+`;
+
+const RegContainer = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin: 10px;
 `;
 
 const User = () => {
@@ -288,84 +261,99 @@ const User = () => {
 
             <UserUpdate>
               <UserUpdateTitle>Edit</UserUpdateTitle>
-              <UserUpdateForm>
-                <UserUpdateLeft>
-                  <UserUpdateItem>
-                    <UserUpdateItemLabel>Username</UserUpdateItemLabel>
-                    <UserUpdateItemInput
-                      name='username'
-                      type='text'
-                      placeholder={user.username}
-                    />
-                  </UserUpdateItem>
-                  <UserUpdateItem>
-                    <UserUpdateItemLabel>Email</UserUpdateItemLabel>
-                    <UserUpdateItemInput
-                      name='email'
-                      type='email'
-                      placeholder={user.email}
-                    />
-                  </UserUpdateItem>
-                  <UserUpdateItem>
-                    <UserUpdateItemLabel>First Name</UserUpdateItemLabel>
-                    <UserUpdateItemInput
-                      name='firstName'
-                      type='text'
-                      placeholder={user.firstName}
-                    />
-                  </UserUpdateItem>
-                  <UserUpdateItem>
-                    <UserUpdateItemLabel>Last Name</UserUpdateItemLabel>
-                    <UserUpdateItemInput
-                      name='lastName'
-                      type='text'
-                      placeholder={user.lastName}
-                    />
-                  </UserUpdateItem>
-                  <UserUpdateItem>
-                    <UserUpdateItemLabel>Middle Name</UserUpdateItemLabel>
-                    <UserUpdateItemInput
-                      name='middleName'
-                      type='text'
-                      placeholder={
-                        user.middleName ? user.middleName : 'Middle Name'
-                      }
-                    />
-                  </UserUpdateItem>
-                  <UserUpdateItem>
-                    <UserUpdateItemLabel>Date of Birth</UserUpdateItemLabel>
-                    <UserUpdateItemInput
-                      name='dateOfBirth'
-                      type='date'
-                      defaultValue={
-                        new Date(user.dateOfBirth).toISOString().split('T')[0]
-                      }
-                    />
-                  </UserUpdateItem>
-                </UserUpdateLeft>
+              <UserUpdateContainer>
+                <Formik
+                  initialValues={{
+                    username: '',
+                    email: '',
+                    firstName: '',
+                    lastName: '',
+                    middleName: '',
+                    dateOfBirth: '',
+                    phoneNumber: '',
+                    address: '',
+                    isAdmin: '',
+                    userTypeId: '',
+                    roleId: '',
+                    gender: '',
+                  }}
+                >
+                  {(formik) => (
+                    <Form>
+                      {/* Top */}
+                      <UserUpdateRight>
+                        <TextField
+                          name='file'
+                          type='file'
+                          label='Image'
+                          accept='image/png, image/jpeg, image/jpg'
+                          width='250px'
+                        />
+                      </UserUpdateRight>
 
-                <UserUpdateRight>
-                  <UserUpdateUpload>
-                    <UserUpdateImg
-                      src={
-                        user.image ||
-                        'https://crowd-literature.eu/wp-content/uploads/2015/01/no-avatar.gif'
-                      }
-                      alt='user picture upload'
-                    />
-                    <label htmlFor='file'>
-                      <FontAwesomeIcon icon={faUpload} style={userUpdateIcon} />
-                    </label>
-                    <input
-                      type='file'
-                      id='file'
-                      accept='image/png, image/jpeg, image/jpg'
-                      style={{ display: 'none' }}
-                    />
-                  </UserUpdateUpload>
-                  <ButtonUpdate>Update</ButtonUpdate>
-                </UserUpdateRight>
-              </UserUpdateForm>
+                      {/* Bottom */}
+                      <UserUpdateLeft>
+                        <TextField
+                          name='username'
+                          type='text'
+                          placeholder='john.doe123'
+                          label='Username'
+                        />
+                        <TextField
+                          name='email'
+                          type='email'
+                          placeholder='john.doe@example.com'
+                          label='Email'
+                        />
+                        <TextField
+                          name='firstName'
+                          type='text'
+                          placeholder='John'
+                          label='First Name'
+                        />
+                        <TextField
+                          name='lastName'
+                          type='text'
+                          placeholder='Doe'
+                          label='Last Name'
+                        />
+                        <TextField
+                          name='middleName'
+                          type='text'
+                          placeholder='Smith'
+                          label='Middle Name'
+                        />
+                        <TextField
+                          name='dateOfBirth'
+                          type='date'
+                          label='Date of Birth'
+                        />
+                        <TextField
+                          name='phoneNumber'
+                          type='text'
+                          placeholder='+447123456789'
+                          label='Phone Number'
+                        />
+                        <TextField
+                          name='address'
+                          type='text'
+                          placeholder='1, Fake st, Fake Town, AQ8 9QT | UK'
+                          label='Address'
+                        />
+                      </UserUpdateLeft>
+                      <RegContainer>
+                        <ButtonUpdate
+                          type='submit'
+                          disabled={!formik.dirty || !formik.isValid || false}
+                        >
+                          UPDATE{' '}
+                          {false && <FontAwesomeIcon icon={faSpinner} spin />}
+                        </ButtonUpdate>
+                      </RegContainer>
+                    </Form>
+                  )}
+                </Formik>
+              </UserUpdateContainer>
             </UserUpdate>
           </UserShowContainer>
         </UserContainer>

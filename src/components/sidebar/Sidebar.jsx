@@ -6,8 +6,12 @@ import {
   faHouseChimney,
   faRightToBracket,
   faMedal,
-  faUsers,
-  faIdBadge,
+  faFingerprint,
+  faUserGroup,
+  faAddressCard,
+  faUserLarge,
+  faUsersBetweenLines,
+  faPersonSwimming,
 } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch } from 'react-redux';
 import { logoutFailure, logoutSuccess } from '../../redux/loginRedux';
@@ -63,10 +67,14 @@ const sidebarIconStyles = {
 const Sidebar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const handleLogout = (e) => {
     e.preventDefault();
     try {
       dispatch(logoutSuccess());
+      setTimeout(() => {
+        localStorage.removeItem('persist:root');
+      }, 1000);
       navigate('/', { replace: true });
     } catch (error) {
       dispatch(logoutFailure());
@@ -95,6 +103,24 @@ const Sidebar = () => {
                 Competitions
               </SidebarListItem>
             </Link>
+            <Link to='/competition' className='link'>
+              <SidebarListItem>
+                <FontAwesomeIcon
+                  style={sidebarIconStyles}
+                  icon={faUsersBetweenLines}
+                />
+                Clubs
+              </SidebarListItem>
+            </Link>
+            <Link to='/competition' className='link'>
+              <SidebarListItem>
+                <FontAwesomeIcon
+                  style={sidebarIconStyles}
+                  icon={faPersonSwimming}
+                />
+                Training Data
+              </SidebarListItem>
+            </Link>
           </SidebarList>
         </SidebarMenu>
         {/* User mgt */}
@@ -103,14 +129,34 @@ const Sidebar = () => {
           <SidebarList>
             <Link to='/users' className='link'>
               <SidebarListItem>
-                <FontAwesomeIcon style={sidebarIconStyles} icon={faUsers} />
+                <FontAwesomeIcon style={sidebarIconStyles} icon={faUserLarge} />
+                Profile
+              </SidebarListItem>
+            </Link>
+            <Link to='/users' className='link'>
+              <SidebarListItem>
+                <FontAwesomeIcon style={sidebarIconStyles} icon={faUserGroup} />
                 Users
               </SidebarListItem>
             </Link>
             <Link to='/user-types' className='link'>
               <SidebarListItem>
-                <FontAwesomeIcon style={sidebarIconStyles} icon={faIdBadge} />
+                <FontAwesomeIcon
+                  style={sidebarIconStyles}
+                  icon={faAddressCard}
+                />
+                {` `}
                 Users Types
+              </SidebarListItem>
+            </Link>
+            <Link to='/roles' className='link'>
+              <SidebarListItem>
+                <FontAwesomeIcon
+                  style={sidebarIconStyles}
+                  icon={faFingerprint}
+                />
+                {` `}
+                Roles
               </SidebarListItem>
             </Link>
           </SidebarList>

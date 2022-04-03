@@ -6,9 +6,12 @@ import {
   Navigate,
 } from 'react-router-dom';
 import './App.css';
+import CreateRole from './pages/createRole/CreateRole';
 import CreateUser from './pages/createUser/CreateUser';
 import Dashboard from './pages/dashboard/Dashboard';
 import Login from './pages/login/Login';
+import Role from './pages/role/Role';
+import Roles from './pages/roles/Roles';
 import SetPassword from './pages/setPassword/SetPassword';
 import User from './pages/user/User';
 import Users from './pages/users/Users';
@@ -42,6 +45,18 @@ const App = () => {
         <Route
           path='/user-types'
           element={currentUser ? <UserTypes /> : <Navigate to='/' />}
+        />
+        <Route
+          path='/roles'
+          element={currentUser ? <Roles /> : <Navigate to='/' />}
+        />
+        <Route
+          path='/create/role'
+          element={currentUser ? <CreateRole /> : <Navigate to='/' />}
+        />
+        <Route
+          path='/role/:roleId'
+          element={currentUser ? <Role /> : <Navigate to='/' />}
         />
         <Route path='/set-password/:activationCode' element={<SetPassword />} />
       </Routes>

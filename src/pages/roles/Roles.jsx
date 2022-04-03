@@ -1,67 +1,45 @@
-import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
-import Sidebar from '../../components/sidebar/Sidebar';
-import Topbar from '../../components/topbar/Topbar';
-import { DataGrid } from '@mui/x-data-grid';
-import { useDispatch } from 'react-redux';
-import { useSelector } from 'react-redux';
-import {
-  getUsersFailure,
-  getUsersStart,
-  getUsersSuccess,
-} from '../../redux/userRedux';
-import { toast, ToastContainer } from 'react-toastify';
-import { openRequest } from '../../apiRequests';
-import { format } from 'timeago.js';
-import { Link } from 'react-router-dom';
-import { setAuthToken } from '../../utils';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCheck,
   faEye,
   faTriangleExclamation,
 } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { DataGrid } from '@mui/x-data-grid';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import styled from 'styled-components';
+import { format } from 'timeago.js';
+import { openRequest } from '../../apiRequests';
 import SearchInput from '../../components/formComponents/SearchInput';
+import Sidebar from '../../components/sidebar/Sidebar';
+import Topbar from '../../components/topbar/Topbar';
+import {
+  getRolesFailure,
+  getRolesStart,
+  getRolesSuccess,
+} from '../../redux/roleRedux';
+import { setAuthToken } from '../../utils';
 
 const Container = styled.div`
   display: flex;
   margin-top: 5px;
 `;
 
-const UsersContainer = styled.div`
+const RolesContainer = styled.div`
   flex: 4;
   padding: 15px;
 `;
 
-const UserCellContainer = styled.div`
-  display: flex;
-  align-items: center;
-`;
-
-const UserCellImg = styled.img`
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-right: 10px;
-`;
-
-const ButtonEdit = styled.button`
-  border: 1px solid #3bb077;
-  border-radius: 10px;
-  padding: 5px 10px;
-  cursor: pointer;
-  background-color: white;
-`;
-
-const CreateUserContainer = styled.div`
+const CreateRoleContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 5px;
 `;
 
-const CreateUserContainerTitle = styled.h1``;
+const CreateRoleContainerTitle = styled.h1``;
 
 const ButtonCreate = styled.button`
   border: none;
@@ -72,47 +50,56 @@ const ButtonCreate = styled.button`
   font-size: 15px;
 `;
 
+const ButtonEdit = styled.button`
+  border: 1px solid #3bb077;
+  border-radius: 10px;
+  padding: 5px 10px;
+  cursor: pointer;
+  background-color: white;
+`;
+
 const SearchContainer = styled.div`
   display: flex;
   justify-content: flex-end;
   margin: 10px 0px;
 `;
 
-const Users = () => {
+const Roles = () => {
   const dispatch = useDispatch();
-  const users = useSelector((state) => state?.user?.users);
-  const currentUser = useSelector((state) => state?.login?.currentUser);
+  const roles = useSelector((state) => state.role?.roles);
+  const currentUser = useSelector((state) => state.login?.currentUser);
   const [query, setQuery] = useState('');
+  // const [showModal, setShowModal] = useState(false);
+  // const [roleId, setRoleId] = useState();
 
   useEffect(() => {
-    dispatch(getUsersStart());
+    dispatch(getRolesStart());
     openRequest
-      .get('/users', setAuthToken(currentUser.accessToken))
+      .get('/roles', setAuthToken(currentUser.accessToken))
       .then((result) => {
-        dispatch(getUsersSuccess(result.data));
+        dispatch(getRolesSuccess(result.data));
       })
       .catch((err) => {
         let message = err.response?.data?.message
           ? err.response?.data?.message
           : err.message;
         toast.error(message);
-        dispatch(getUsersFailure());
+        dispatch(getRolesFailure());
       });
   }, [dispatch, currentUser]);
 
-  const keys = ['firstName', 'lastName', 'email', 'username'];
   const search = (data) => {
     return data.filter((item) =>
-      keys.some((key) => item[key].toLowerCase().includes(query.toLowerCase()))
+      item.name.toLowerCase().includes(query.toLowerCase())
     );
   };
 
   const rows =
-    users &&
-    Object.entries(search(users)).map(([k, v]) => {
+    roles &&
+    Object.entries(search(roles)).map(([k, v]) => {
       return {
         ...v,
-        id: users[k]._id,
+        id: roles[k]._id,
       };
     });
 
@@ -123,62 +110,34 @@ const Users = () => {
       width: 210,
     },
     {
-      field: 'user',
-      headerName: 'User',
-      width: 220,
-      renderCell: (params) => {
-        return (
-          <UserCellContainer>
-            <UserCellImg
-              src={
-                params.row.image ||
-                'https://crowd-literature.eu/wp-content/uploads/2015/01/no-avatar.gif'
-              }
-              alt='user image'
-            />
-            {params.row.firstName} {params.row.lastName.toUpperCase()}
-          </UserCellContainer>
-        );
-      },
-    },
-    { field: 'email', headerName: 'Email', width: 250 },
-    {
-      field: 'username',
-      headerName: 'Username',
-      width: 150,
+      field: 'name',
+      headerName: 'Name',
+      width: 210,
     },
     {
       field: '_created',
-      headerName: 'Registered',
-      width: 120,
+      headerName: 'Created',
+      width: 210,
       renderCell: (params) => {
         return <span>{format(params.row._created)}</span>;
       },
     },
     {
-      field: 'userType',
-      headerName: 'User Type',
-      width: 100,
-      renderCell: (params) => {
-        return <span>{params.row.userType.name}</span>;
-      },
-    },
-    {
-      field: 'activated',
-      headerName: 'Activated',
-      width: 100,
+      field: 'assignable',
+      headerName: 'Status',
+      width: 210,
       renderCell: (params) => {
         return (
           <span
             style={{
-              border: `1px solid ${params.row.active ? 'green' : 'red'}`,
+              border: `1px solid ${params.row.assignable ? 'green' : 'red'}`,
               width: '70px',
               textAlign: 'center',
               borderRadius: '10px',
               padding: '1px',
             }}
           >
-            {params.row.active ? (
+            {params.row.assignable ? (
               <>
                 <FontAwesomeIcon icon={faCheck} style={{ color: '#3bb077' }} />{' '}
                 Active
@@ -198,12 +157,13 @@ const Users = () => {
     },
     {
       field: 'action',
-      headerName: 'Action',
-      width: 100,
+      headerName: 'Actions',
+      width: 210,
       renderCell: (params) => {
         return (
           <>
-            <Link to={'/user/' + params.row._id}>
+            <Link to={'/role/' + params.row._id}>
+              {/* name={params.row._id} onClick={openModal} */}
               <ButtonEdit>
                 <FontAwesomeIcon icon={faEye} style={{ color: '#3bb077' }} />{' '}
                 View
@@ -214,6 +174,12 @@ const Users = () => {
       },
     },
   ];
+
+  // const openModal = (e) => {
+  //   e.preventDefault();
+  //   setRoleId(e.target.name);
+  //   setShowModal((prev) => !prev);
+  // };
 
   return (
     <>
@@ -231,13 +197,13 @@ const Users = () => {
           pauseOnHover
         />
         <Sidebar />
-        <UsersContainer>
-          <CreateUserContainer>
-            <CreateUserContainerTitle>Users</CreateUserContainerTitle>
-            <Link to='/create/user'>
+        <RolesContainer>
+          <CreateRoleContainer>
+            <CreateRoleContainerTitle>Roles</CreateRoleContainerTitle>
+            <Link to='/create/role'>
               <ButtonCreate>Create</ButtonCreate>
             </Link>
-          </CreateUserContainer>
+          </CreateRoleContainer>
           <SearchContainer>
             <SearchInput
               type='text'
@@ -253,10 +219,15 @@ const Users = () => {
             pageSize={10}
             rowsPerPageOptions={[10]}
           />
-        </UsersContainer>
+        </RolesContainer>
+        {/* <PermissionModal
+          showModal={showModal}
+          setShowModal={setShowModal}
+          roleId={roleId}
+        /> */}
       </Container>
     </>
   );
 };
 
-export default Users;
+export default Roles;

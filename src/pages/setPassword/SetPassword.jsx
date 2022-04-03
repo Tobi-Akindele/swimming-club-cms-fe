@@ -110,7 +110,7 @@ const SetPassword = () => {
             confirmPassword: '',
           }}
           validationSchema={validate}
-          onSubmit={(values) => {
+          onSubmit={(values, { resetForm }) => {
             const setPassword = {
               ...values,
               activationCode: activationCode,
@@ -119,6 +119,7 @@ const SetPassword = () => {
             openRequest
               .post('/set/password', setPassword)
               .then((result) => {
+                resetForm({});
                 dispatch(setPasswordSuccess(result.data));
                 setTimeout(() => {
                   navigate('/', { replace: true });
