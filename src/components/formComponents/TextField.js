@@ -14,6 +14,7 @@ const Label = styled.label``;
 const UserUpdateItemInput = styled.input`
   border: none;
   height: 30px;
+  width: ${(props) => props.width};
   border-bottom: ${(props) =>
     props.hasError ? '1px solid red' : '1px solid grey'};
 `;

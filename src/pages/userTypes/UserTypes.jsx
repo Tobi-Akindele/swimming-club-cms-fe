@@ -26,7 +26,7 @@ const Container = styled.div`
   margin-top: 5px;
 `;
 
-const UserTypessContainer = styled.div`
+const UserTypesContainer = styled.div`
   flex: 4;
   padding: 15px;
 `;
@@ -149,15 +149,21 @@ const UserTypes = () => {
           pauseOnHover
         />
         <Sidebar />
-        <UserTypessContainer>
+        <UserTypesContainer>
           <CreateUserTypeContainer>
             <CreateUserContainerTitle>User Types</CreateUserContainerTitle>
             <Link to='/'>
               <ButtonCreate>Create</ButtonCreate>
             </Link>
           </CreateUserTypeContainer>
-          <DataGrid rows={rows} columns={columns} autoHeight pageSize={10} />
-        </UserTypessContainer>
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            autoHeight
+            pageSize={10}
+            rowsPerPageOptions={[10]}
+          />
+        </UserTypesContainer>
       </Container>
     </>
   );

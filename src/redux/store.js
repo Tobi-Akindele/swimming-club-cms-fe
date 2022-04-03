@@ -3,6 +3,7 @@ import loginReducer from './loginRedux';
 import userReducer from './userRedux';
 import roleReducer from './roleRedux';
 import userTypeReducer from './userTypeRedux';
+import permissionReducer from './permissionRedux';
 import {
   persistStore,
   persistReducer,
@@ -26,6 +27,7 @@ const rootReducer = combineReducers({
   user: userReducer,
   userType: userTypeReducer,
   role: roleReducer,
+  permission: permissionReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

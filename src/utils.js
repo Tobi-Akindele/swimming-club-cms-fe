@@ -16,3 +16,10 @@ export const setAuthToken = (accessToken) => {
   };
   return config;
 };
+
+export const filterArray = (array = [], filter = []) => {
+  if (filter.length === 0) {
+    return array;
+  }
+  return array.filter((a) => !filter.map((b) => b._id).includes(a._id));
+};
