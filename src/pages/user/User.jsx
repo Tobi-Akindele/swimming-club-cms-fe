@@ -1,5 +1,5 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router';
 import styled from 'styled-components';
 import Sidebar from '../../components/sidebar/Sidebar';
@@ -19,9 +19,36 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import moment from 'moment';
 import { format } from 'timeago.js';
-import { calculateAge } from '../../utils';
+import { calculateAge, genderOptions, setAuthToken } from '../../utils';
 import TextField from '../../components/formComponents/TextField';
+import Radio from '../../components/formComponents/Radio';
 import { Form, Formik } from 'formik';
+import Select from '../../components/formComponents/Select';
+import {
+  getUserTypesFailure,
+  getUserTypesStart,
+  getUserTypesSuccess,
+} from '../../redux/userTypeRedux';
+import { openRequest } from '../../apiRequests';
+import {
+  getRolesFailure,
+  getRolesStart,
+  getRolesSuccess,
+} from '../../redux/roleRedux';
+import * as Yup from 'yup';
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from 'firebase/storage';
+import app from '../../firebase';
+import { toast, ToastContainer } from 'react-toastify';
+import {
+  updateUserFailure,
+  updateUserStart,
+  updateUserSuccess,
+} from '../../redux/userRedux';
 
 const Container = styled.div`
   display: flex;
@@ -137,6 +164,9 @@ const ButtonUpdate = styled.button`
   color: white;
   font-weight: 600;
   cursor: pointer;
+  &:disabled {
+    cursor: not-allowed;
+  }
 `;
 
 const UserUpdateContainer = styled.div`
@@ -153,15 +183,77 @@ const RegContainer = styled.div`
 
 const User = () => {
   const location = useLocation();
+  const dispatch = useDispatch();
+  const currentUser = useSelector((state) => state.login?.currentUser);
   const userId = location.pathname.split('/')[2];
   const user = useSelector((state) =>
     state.user.users.find((user) => user._id === userId)
   );
+  const { userTypes, isFetching: isFetchingUserTypes } = useSelector(
+    (state) => state.userType
+  );
+  const { roles, isFetching: isFetchingRoles } = useSelector(
+    (state) => state.role
+  );
+  const { isFetching: isUpdating } = useSelector((state) => state.user);
+  const [file, setFile] = useState(null);
+
+  useEffect(() => {
+    //User types
+    dispatch(getUserTypesStart());
+    openRequest
+      .get('/user-types', setAuthToken(currentUser?.accessToken))
+      .then((result) => {
+        dispatch(getUserTypesSuccess(result.data));
+      })
+      .catch((err) => {
+        dispatch(getUserTypesFailure());
+      });
+  }, [dispatch, currentUser]);
+
+  useEffect(() => {
+    //Roles
+    dispatch(getRolesStart());
+    openRequest
+      .get('/roles', setAuthToken(currentUser?.accessToken))
+      .then((result) => {
+        dispatch(getRolesSuccess(result.data));
+      })
+      .catch((err) => {
+        dispatch(getRolesFailure());
+      });
+  }, [dispatch, currentUser]);
+
+  const validate = Yup.object({
+    firstName: Yup.string()
+      .min(2, 'Too short')
+      .max(40, 'Too long')
+      .required('First name is required'),
+    lastName: Yup.string()
+      .min(2, 'Too short')
+      .max(40, 'Too long')
+      .required('Last name is required'),
+    dateOfBirth: Yup.string().required('Date of Birth is required'),
+    userTypeId: Yup.string().required('Required'),
+    roleId: Yup.string().required('Required'),
+    gender: Yup.string().required('Required'),
+  });
 
   return (
     <>
       <Topbar wMessage={false} />
       <Container>
+        <ToastContainer
+          position='top-center'
+          autoClose={2000}
+          hideProgressBar={false}
+          newestOnTop={true}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
         <Sidebar />
         <UserContainer>
           <UserTitleContainer>
@@ -179,7 +271,8 @@ const User = () => {
                 />
                 <UserShowTopTitle>
                   <UserShowUsername>
-                    {user?.firstName} {user?.lastName.toUpperCase()}
+                    {user?.firstName} {user?.lastName.toUpperCase()}{' '}
+                    {user.middleName}
                   </UserShowUsername>
                   <UserShowUserType>{user?.userType?.name}</UserShowUserType>
                 </UserShowTopTitle>
@@ -224,7 +317,7 @@ const User = () => {
                   </UserShowInfoTitle>
                 </UserShowInfo>
                 <UserShowInfo>
-                  <FontAwesomeIcon /> Status
+                  Status
                   <UserShowInfoTitle>
                     <span
                       style={{
@@ -264,18 +357,66 @@ const User = () => {
               <UserUpdateContainer>
                 <Formik
                   initialValues={{
-                    username: '',
-                    email: '',
-                    firstName: '',
-                    lastName: '',
-                    middleName: '',
-                    dateOfBirth: '',
-                    phoneNumber: '',
-                    address: '',
-                    isAdmin: '',
-                    userTypeId: '',
-                    roleId: '',
-                    gender: '',
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    middleName: user.middleName,
+                    dateOfBirth: user.dateOfBirth.split('T')[0],
+                    phoneNumber: user.phoneNumber,
+                    address: user.address,
+                    userTypeId: user.userType._id,
+                    roleId: user.role._id,
+                    gender: user.gender,
+                  }}
+                  validationSchema={validate}
+                  onSubmit={(values, { resetForm }) => {
+                    let userUpdate = {};
+                    if (file) {
+                      const fileName = new Date().getTime() + file.name;
+                      const storage = getStorage(app);
+                      const storageRef = ref(storage, fileName);
+                      const uploadTask = uploadBytesResumable(storageRef, file);
+                      uploadTask.on(
+                        'state_changed',
+                        (snapshot) => {},
+                        (err) => {
+                          console.log(err);
+                        },
+                        () => {
+                          getDownloadURL(uploadTask.snapshot.ref).then(
+                            (downloadURL) => {
+                              userUpdate = {
+                                image: downloadURL,
+                                ...values,
+                              };
+                            }
+                          );
+                        }
+                      );
+                    } else {
+                      userUpdate = {
+                        image: user.image,
+                        ...values,
+                      };
+                    }
+                    dispatch(updateUserStart());
+                    openRequest
+                      .put(
+                        `/user/update/${userId}`,
+                        userUpdate,
+                        setAuthToken(currentUser.accessToken)
+                      )
+                      .then((result) => {
+                        // resetForm({});
+                        dispatch(updateUserSuccess(result.data));
+                        toast.success('Update successful');
+                      })
+                      .catch((err) => {
+                        let message = err.response?.data?.message
+                          ? err.response?.data?.message
+                          : err.message;
+                        toast.error(message);
+                        dispatch(updateUserFailure());
+                      });
                   }}
                 >
                   {(formik) => (
@@ -287,67 +428,80 @@ const User = () => {
                           type='file'
                           label='Image'
                           accept='image/png, image/jpeg, image/jpg'
-                          width='250px'
+                          onChange={(e) => setFile(e.target.files[0])}
                         />
                       </UserUpdateRight>
 
                       {/* Bottom */}
                       <UserUpdateLeft>
-                        <TextField
-                          name='username'
-                          type='text'
-                          placeholder='john.doe123'
-                          label='Username'
+                        <Select
+                          label='User Type'
+                          name='userTypeId'
+                          options={userTypes}
+                          loading={isFetchingUserTypes}
+                          value={user.userType._id}
                         />
-                        <TextField
-                          name='email'
-                          type='email'
-                          placeholder='john.doe@example.com'
-                          label='Email'
+                        <Select
+                          label='User Role'
+                          name='roleId'
+                          options={roles}
+                          loading={isFetchingRoles}
+                          value={user.role._id}
                         />
                         <TextField
                           name='firstName'
                           type='text'
-                          placeholder='John'
+                          placeholder={user.firstName}
                           label='First Name'
                         />
                         <TextField
                           name='lastName'
                           type='text'
-                          placeholder='Doe'
+                          placeholder={user.lastName}
                           label='Last Name'
                         />
                         <TextField
                           name='middleName'
                           type='text'
-                          placeholder='Smith'
+                          placeholder={user.middleName}
                           label='Middle Name'
                         />
                         <TextField
                           name='dateOfBirth'
                           type='date'
                           label='Date of Birth'
+                          value={user.dateOfBirth.split('T')[0]}
                         />
                         <TextField
                           name='phoneNumber'
                           type='text'
-                          placeholder='+447123456789'
+                          placeholder={user.phoneNumber}
                           label='Phone Number'
                         />
                         <TextField
                           name='address'
                           type='text'
-                          placeholder='1, Fake st, Fake Town, AQ8 9QT | UK'
+                          placeholder={user.address}
                           label='Address'
+                        />
+                        <Radio
+                          label='Gender'
+                          name='gender'
+                          options={genderOptions}
+                          value={user.gender}
                         />
                       </UserUpdateLeft>
                       <RegContainer>
                         <ButtonUpdate
                           type='submit'
-                          disabled={!formik.dirty || !formik.isValid || false}
+                          disabled={
+                            !formik.dirty || !formik.isValid || isUpdating
+                          }
                         >
                           UPDATE{' '}
-                          {false && <FontAwesomeIcon icon={faSpinner} spin />}
+                          {isUpdating && (
+                            <FontAwesomeIcon icon={faSpinner} spin />
+                          )}
                         </ButtonUpdate>
                       </RegContainer>
                     </Form>

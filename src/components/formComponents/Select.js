@@ -31,7 +31,6 @@ const Select = (props) => {
         name={name}
         {...others}
         disabled={loading}
-        value={value}
       >
         <option key={0} value={''} disabled={true}>
           {'Select an option'}
@@ -42,6 +41,7 @@ const Select = (props) => {
               <option
                 key={option._id}
                 value={option._id}
+                selected={option._id === value}
                 disabled={!option.assignable}
               >
                 {option.name}

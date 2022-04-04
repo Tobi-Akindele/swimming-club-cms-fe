@@ -97,13 +97,13 @@ const Sidebar = () => {
                 Home
               </SidebarListItem>
             </Link>
-            <Link to='/competition' className='link'>
+            <Link to='/competitions' className='link'>
               <SidebarListItem>
                 <FontAwesomeIcon style={sidebarIconStyles} icon={faMedal} />
                 Competitions
               </SidebarListItem>
             </Link>
-            <Link to='/competition' className='link'>
+            <Link to='/' className='link'>
               <SidebarListItem>
                 <FontAwesomeIcon
                   style={sidebarIconStyles}
@@ -112,7 +112,7 @@ const Sidebar = () => {
                 Clubs
               </SidebarListItem>
             </Link>
-            <Link to='/competition' className='link'>
+            <Link to='/' className='link'>
               <SidebarListItem>
                 <FontAwesomeIcon
                   style={sidebarIconStyles}
