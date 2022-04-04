@@ -150,7 +150,7 @@ const Users = () => {
     {
       field: '_created',
       headerName: 'Registered',
-      width: 120,
+      width: 150,
       renderCell: (params) => {
         return <span>{format(params.row._created)}</span>;
       },
@@ -158,7 +158,7 @@ const Users = () => {
     {
       field: 'userType',
       headerName: 'User Type',
-      width: 100,
+      width: 150,
       renderCell: (params) => {
         return <span>{params.row.userType.name}</span>;
       },
@@ -166,7 +166,7 @@ const Users = () => {
     {
       field: 'activated',
       headerName: 'Activated',
-      width: 100,
+      width: 150,
       renderCell: (params) => {
         return (
           <span
@@ -199,7 +199,7 @@ const Users = () => {
     {
       field: 'action',
       headerName: 'Action',
-      width: 100,
+      width: 150,
       renderCell: (params) => {
         return (
           <>

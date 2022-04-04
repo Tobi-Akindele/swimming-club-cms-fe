@@ -23,3 +23,14 @@ export const filterArray = (array = [], filter = []) => {
   }
   return array.filter((a) => !filter.map((b) => b._id).includes(a._id));
 };
+
+export const adminOptions = [
+  { key: 'Yes', value: 'true' },
+  { key: 'No', value: 'false' },
+];
+
+export const genderOptions = [
+  { key: 'Male', value: 'Male' },
+  { key: 'Female', value: 'Female' },
+  { key: 'Other', value: 'Other' },
+];

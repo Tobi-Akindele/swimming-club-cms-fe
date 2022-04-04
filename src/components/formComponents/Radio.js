@@ -22,7 +22,7 @@ const Input = styled.input`
 `;
 
 const Radio = (props) => {
-  const { label, name, options, ...others } = props;
+  const { label, name, options, value, ...others } = props;
   return (
     <UserUpdateItem>
       <Label>{label}</Label>

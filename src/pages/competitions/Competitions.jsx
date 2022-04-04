@@ -1,10 +1,12 @@
 import {
-  faCheck,
   faEye,
-  faTriangleExclamation,
+  faLock,
+  faLockOpen,
+  faSpinner,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DataGrid } from '@mui/x-data-grid';
+import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -16,10 +18,13 @@ import SearchInput from '../../components/formComponents/SearchInput';
 import Sidebar from '../../components/sidebar/Sidebar';
 import Topbar from '../../components/topbar/Topbar';
 import {
-  getRolesFailure,
-  getRolesStart,
-  getRolesSuccess,
-} from '../../redux/roleRedux';
+  deleteCompetitionsFailure,
+  deleteCompetitionsStart,
+  deleteCompetitionsSuccess,
+  getCompetitionsFailure,
+  getCompetitionsStart,
+  getCompetitionsSuccess,
+} from '../../redux/competitionRedux';
 import { setAuthToken } from '../../utils';
 
 const Container = styled.div`
@@ -64,25 +69,47 @@ const SearchContainer = styled.div`
   margin: 10px 0px;
 `;
 
-const Roles = () => {
+const DeleteContainer = styled.div`
+  display: flex;
+  margin: 15px 0px;
+  justify-content: flex-end;
+`;
+
+const ButtonDelete = styled.button`
+  border: none;
+  padding: 10px;
+  background-color: red;
+  margin: 0px 10px;
+  cursor: pointer;
+  color: white;
+  font-size: 15px;
+  &:disabled {
+    cursor: not-allowed;
+  }
+`;
+
+const Competitions = () => {
   const dispatch = useDispatch();
-  const roles = useSelector((state) => state.role?.roles);
+  const { competitions, isFetching: isDeleting } = useSelector(
+    (state) => state.competition
+  );
   const currentUser = useSelector((state) => state.login?.currentUser);
   const [query, setQuery] = useState('');
+  const [selectedRows, setSelectedRows] = useState([]);
 
   useEffect(() => {
-    dispatch(getRolesStart());
+    dispatch(getCompetitionsStart());
     openRequest
-      .get('/roles', setAuthToken(currentUser.accessToken))
+      .get('/competitions', setAuthToken(currentUser.accessToken))
       .then((result) => {
-        dispatch(getRolesSuccess(result.data));
+        dispatch(getCompetitionsSuccess(result.data));
       })
       .catch((err) => {
         let message = err.response?.data?.message
           ? err.response?.data?.message
           : err.message;
         toast.error(message);
-        dispatch(getRolesFailure());
+        dispatch(getCompetitionsFailure());
       });
   }, [dispatch, currentUser]);
 
@@ -93,13 +120,38 @@ const Roles = () => {
   };
 
   const rows =
-    roles &&
-    Object.entries(search(roles)).map(([k, v]) => {
+    competitions &&
+    Object.entries(search(competitions)).map(([k, v]) => {
       return {
         ...v,
-        id: roles[k]._id,
+        id: competitions[k]._id,
       };
     });
+
+  const handleDelete = (e) => {
+    e.preventDefault();
+    const payload = {
+      competitionIds: selectedRows,
+    };
+    dispatch(deleteCompetitionsStart());
+    openRequest
+      .post(
+        '/competitions/delete',
+        payload,
+        setAuthToken(currentUser.accessToken)
+      )
+      .then((result) => {
+        dispatch(deleteCompetitionsSuccess(selectedRows));
+        toast.success('Deleted successfully');
+      })
+      .catch((err) => {
+        let message = err.response?.data?.message
+          ? err.response?.data?.message
+          : err.message;
+        toast.error(message);
+        dispatch(deleteCompetitionsFailure());
+      });
+  };
 
   const columns = [
     {
@@ -113,44 +165,61 @@ const Roles = () => {
       width: 210,
     },
     {
-      field: '_created',
-      headerName: 'Created',
+      field: 'date',
+      headerName: 'Date',
       width: 210,
       renderCell: (params) => {
-        return <span>{format(params.row._created)}</span>;
+        return (
+          <span>
+            {moment(params.row.date).format('MMM Do YYYY')} (
+            <span style={{ fontWeight: '1000' }}>
+              {format(params.row.date)})
+            </span>
+          </span>
+        );
       },
     },
     {
-      field: 'assignable',
+      field: 'status',
       headerName: 'Status',
       width: 210,
       renderCell: (params) => {
         return (
           <span
             style={{
-              border: `1px solid ${params.row.assignable ? 'green' : 'red'}`,
+              border: `1px solid ${
+                moment(params.row.date).isAfter(new Date()) ? 'green' : 'red'
+              }`,
               width: '70px',
               textAlign: 'center',
               borderRadius: '10px',
               padding: '1px',
             }}
           >
-            {params.row.assignable ? (
+            {moment(params.row.date).isAfter(new Date()) ? (
               <>
-                <FontAwesomeIcon icon={faCheck} style={{ color: '#3bb077' }} />{' '}
-                Active
+                <FontAwesomeIcon
+                  icon={faLockOpen}
+                  style={{ color: '#3bb077' }}
+                />{' '}
+                Open
               </>
             ) : (
               <>
-                <FontAwesomeIcon
-                  icon={faTriangleExclamation}
-                  style={{ color: 'red' }}
-                />{' '}
-                Inactive
+                <FontAwesomeIcon icon={faLock} style={{ color: 'red' }} />{' '}
+                Closed
               </>
             )}
           </span>
         );
+      },
+    },
+    {
+      field: '_created',
+      headerName: 'Created',
+      width: 210,
+      renderCell: (params) => {
+        return <span>{format(params.row._created)}</span>;
       },
     },
     {
@@ -160,7 +229,7 @@ const Roles = () => {
       renderCell: (params) => {
         return (
           <>
-            <Link to={'/role/' + params.row._id}>
+            <Link to={'/competition/' + params.row._id}>
               <ButtonEdit>
                 <FontAwesomeIcon icon={faEye} style={{ color: '#3bb077' }} />{' '}
                 View
@@ -190,8 +259,8 @@ const Roles = () => {
         <Sidebar />
         <RolesContainer>
           <CreateRoleContainer>
-            <CreateRoleContainerTitle>Roles</CreateRoleContainerTitle>
-            <Link to='/create/role'>
+            <CreateRoleContainerTitle>Competitions</CreateRoleContainerTitle>
+            <Link to='/create/competition'>
               <ButtonCreate>Create</ButtonCreate>
             </Link>
           </CreateRoleContainer>
@@ -203,12 +272,24 @@ const Roles = () => {
               width='300px'
             />
           </SearchContainer>
+          <DeleteContainer>
+            {selectedRows.length ? (
+              <ButtonDelete onClick={handleDelete}>
+                REMOVE ({selectedRows.length}) SELECTED
+                {isDeleting ? <FontAwesomeIcon icon={faSpinner} spin /> : null}
+              </ButtonDelete>
+            ) : null}
+          </DeleteContainer>
           <DataGrid
             rows={rows}
             columns={columns}
             autoHeight
             pageSize={10}
             rowsPerPageOptions={[10]}
+            checkboxSelection
+            onSelectionModelChange={(ids) => {
+              setSelectedRows(ids);
+            }}
           />
         </RolesContainer>
       </Container>
@@ -216,4 +297,4 @@ const Roles = () => {
   );
 };
 
-export default Roles;
+export default Competitions;

@@ -27,7 +27,7 @@ import {
   getUserTypesStart,
   getUserTypesSuccess,
 } from '../../redux/userTypeRedux';
-import { setAuthToken } from '../../utils';
+import { adminOptions, genderOptions, setAuthToken } from '../../utils';
 import {
   getRolesFailure,
   getRolesStart,
@@ -202,17 +202,6 @@ const CreateUser = () => {
     gender: Yup.string().required('Required'),
   });
 
-  const adminOptions = [
-    { key: 'Yes', value: 'true' },
-    { key: 'No', value: 'false' },
-  ];
-
-  const genderOptions = [
-    { key: 'Male', value: 'male' },
-    { key: 'Female', value: 'female' },
-    { key: 'Other', value: 'other' },
-  ];
-
   useEffect(() => {
     //User types
     dispatch(getUserTypesStart());
@@ -281,11 +270,7 @@ const CreateUser = () => {
                   const uploadTask = uploadBytesResumable(storageRef, file);
                   uploadTask.on(
                     'state_changed',
-                    (snapshot) => {
-                      const progress =
-                        (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                      console.log('Upload is ' + progress + '% done');
-                    },
+                    (snapshot) => {},
                     (err) => {
                       console.log(err);
                     },
