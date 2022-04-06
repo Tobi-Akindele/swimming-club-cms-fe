@@ -6,7 +6,6 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DataGrid } from '@mui/x-data-grid';
 import React, { useEffect, useState } from 'react';
-// import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router';
 import { toast } from 'react-toastify';
@@ -17,11 +16,6 @@ import SearchInput from '../../components/formComponents/SearchInput';
 import PermissionModal from '../../components/modal/PermissionModal';
 import Sidebar from '../../components/sidebar/Sidebar';
 import Topbar from '../../components/topbar/Topbar';
-// import {
-//   getRoleByIdFailure,
-//   getRoleByIdStart,
-//   getRoleByIdSuccess,
-// } from '../../redux/roleRedux';
 import { setAuthToken } from '../../utils';
 
 const Container = styled.div`
@@ -31,7 +25,7 @@ const Container = styled.div`
 
 const RoleContainer = styled.div`
   flex: 4;
-  padding: 20px;
+  padding: 0px 20px;
 `;
 
 const RoleTitleContainer = styled.div`

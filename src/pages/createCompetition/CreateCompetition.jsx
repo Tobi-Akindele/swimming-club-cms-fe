@@ -97,7 +97,7 @@ const CreateCompetition = () => {
 
   const validate = Yup.object({
     name: Yup.string()
-      .min(2, 'Too short')
+      .min(3, 'Too short')
       .isUniqueName('Name exists')
       .required('Competition name is required'),
     date: Yup.string().required('Competition date is required'),
