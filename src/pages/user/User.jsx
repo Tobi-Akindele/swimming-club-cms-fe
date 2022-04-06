@@ -57,7 +57,7 @@ const Container = styled.div`
 
 const UserContainer = styled.div`
   flex: 4;
-  padding: 20px;
+  padding: 0px 20px;
 `;
 
 const UserTitleContainer = styled.div`

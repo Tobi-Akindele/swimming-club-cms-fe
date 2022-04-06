@@ -6,11 +6,13 @@ import {
   Navigate,
 } from 'react-router-dom';
 import './App.css';
+import Competition from './pages/competition/Competition';
 import Competitions from './pages/competitions/Competitions';
 import CreateCompetition from './pages/createCompetition/CreateCompetition';
 import CreateRole from './pages/createRole/CreateRole';
 import CreateUser from './pages/createUser/CreateUser';
 import Dashboard from './pages/dashboard/Dashboard';
+import Event from './pages/event/Event';
 import Login from './pages/login/Login';
 import Role from './pages/role/Role';
 import Roles from './pages/roles/Roles';
@@ -67,6 +69,14 @@ const App = () => {
         <Route
           path='/create/competition'
           element={currentUser ? <CreateCompetition /> : <Navigate to='/' />}
+        />
+        <Route
+          path='/competition/:competitionId'
+          element={currentUser ? <Competition /> : <Navigate to='/' />}
+        />
+        <Route
+          path='/competition/:competitionId/event/:eventId'
+          element={currentUser ? <Event /> : <Navigate to='/' />}
         />
         <Route path='/set-password/:activationCode' element={<SetPassword />} />
       </Routes>

@@ -34,7 +34,7 @@ const Container = styled.div`
 
 const RolesContainer = styled.div`
   flex: 4;
-  padding: 15px;
+  padding: 0px 20px;
 `;
 
 const CreateRoleContainer = styled.div`
