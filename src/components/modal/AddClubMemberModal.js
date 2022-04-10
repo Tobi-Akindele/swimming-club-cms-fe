@@ -1,20 +1,14 @@
 import { faSpinner, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Form, Formik } from 'formik';
-import React, { useRef } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { toast, ToastContainer } from 'react-toastify';
 import styled from 'styled-components';
 import { openRequest } from '../../apiRequests';
 import * as Yup from 'yup';
 import { setAuthToken } from '../../utils';
-import TextField from '../formComponents/TextField';
-import {
-  createEventFailure,
-  createEventStart,
-  createEventSuccess,
-} from '../../redux/competitionRedux';
+import DataListInput from '../formComponents/DataListInput';
 
 const Background = styled.div`
   width: 100%;
@@ -80,11 +74,10 @@ const ButtonUpdate = styled.button`
   }
 `;
 
-const AddEventModal = ({ showModal, setShowModal, competitionId }) => {
+const AddClubMemberModal = ({ showModal, setShowModal, clubId }) => {
   const modalRef = useRef();
   const currentUser = useSelector((state) => state.login?.currentUser);
-  const { isFetching: isCreating } = useSelector((state) => state.competition);
-  const dispatch = useDispatch();
+  const [registering, setRegistering] = useState(false);
 
   const closeModal = (e) => {
     if (modalRef.current === e.target) {
@@ -92,37 +85,29 @@ const AddEventModal = ({ showModal, setShowModal, competitionId }) => {
     }
   };
 
-  function isUniqueName(eMessage) {
-    return this.test('isUniqueName', async function (value) {
-      const { path, createError } = this;
-      if (!value || value?.length < 2) {
-        return true;
-      }
-      let config = {
-        headers: {
-          Authorization: `Bearer ${currentUser.accessToken}`,
-          name: value,
-          competitionId: competitionId,
-        },
-      };
-
-      try {
-        await openRequest.get('/event/name', config);
-        return createError({ path, message: eMessage });
-      } catch (error) {
-        return true;
-      }
-    });
-  }
-
-  Yup.addMethod(Yup.mixed, 'isUniqueName', isUniqueName);
-
   const validate = Yup.object({
-    name: Yup.string()
-      .min(3, 'Too short')
-      .isUniqueName('Event exists')
-      .required('Event name is required'),
+    userId: Yup.string().required('Value is required'),
   });
+
+  const loadOptions = async (inputText, callback) => {
+    let config = {
+      headers: {
+        username: inputText,
+        userType: 'swimmer',
+      },
+    };
+    try {
+      const response = await openRequest.get('/users/search/type', config);
+      const json = await response.data;
+
+      callback(
+        json.map((item) => ({
+          label: `${item.username} (${item.firstName} ${item.lastName})`,
+          value: item._id,
+        }))
+      );
+    } catch (error) {}
+  };
 
   return (
     <>
@@ -141,61 +126,66 @@ const AddEventModal = ({ showModal, setShowModal, competitionId }) => {
         <Background onClick={closeModal} ref={modalRef}>
           <ModalWrapper showModal={showModal}>
             <ModalContentTop>
-              <ModalContentTopTitle>Create Event</ModalContentTopTitle>
+              <ModalContentTopTitle>Member Registration</ModalContentTopTitle>
             </ModalContentTop>
 
             <ModalContentBottom>
               <Formik
-                initialValues={{ name: '' }}
+                initialValues={{ userId: '' }}
                 validationSchema={validate}
                 onSubmit={(values, { resetForm }) => {
                   const payload = {
-                    ...values,
-                    competitionId: competitionId,
+                    clubId: clubId,
+                    memberId: values.userId,
                   };
-                  dispatch(createEventStart());
+                  setRegistering(true);
                   openRequest
                     .post(
-                      '/event',
+                      '/club/add/member',
                       payload,
                       setAuthToken(currentUser.accessToken)
                     )
                     .then((result) => {
+                      setRegistering(false);
                       resetForm({});
-                      const newEvent = {
-                        ...result.data,
-                        competitionId: competitionId,
-                      };
-                      dispatch(createEventSuccess(newEvent));
-                      toast.success('Event created successfully');
+                      toast.success('Registration successful');
+                      setTimeout(() => {
+                        window.location.reload();
+                      }, 2000);
                     })
                     .catch((err) => {
+                      setRegistering(false);
                       let message = err.response?.data?.message
                         ? err.response?.data?.message
                         : err.message;
                       toast.error(message);
-                      dispatch(createEventFailure());
                     });
                 }}
               >
                 {(formik) => (
                   <Form>
-                    <TextField
-                      name='name'
+                    <DataListInput
+                      value={formik.values.userId}
+                      name='userId'
                       type='text'
-                      placeholder='New Event'
-                      label='Name'
+                      placeholder='Search Swimmers'
+                      label='Member Name'
+                      onChange={formik.setFieldValue}
+                      onBlur={formik.setFieldTouched}
+                      loadOptions={loadOptions}
+                      error={formik.errors.userId}
+                      touched={formik.touched.userId}
                       width='350px'
                     />
                     <ButtonContainer>
                       <ButtonUpdate
                         type='submit'
                         disabled={
-                          !formik.dirty || !formik.isValid || isCreating
+                          !formik.dirty || !formik.isValid || registering
                         }
                       >
-                        SUBMIT{' '}
-                        {isCreating && (
+                        REGISTER{' '}
+                        {registering && (
                           <FontAwesomeIcon icon={faSpinner} spin />
                         )}
                       </ButtonUpdate>
@@ -217,4 +207,4 @@ const AddEventModal = ({ showModal, setShowModal, competitionId }) => {
   );
 };
 
-export default AddEventModal;
+export default AddClubMemberModal;

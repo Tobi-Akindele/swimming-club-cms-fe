@@ -5,6 +5,7 @@ import roleReducer from './roleRedux';
 import userTypeReducer from './userTypeRedux';
 import permissionReducer from './permissionRedux';
 import competitionReducer from './competitionRedux';
+import clubReducer from './clubRedux';
 import {
   persistStore,
   persistReducer,
@@ -30,6 +31,7 @@ const rootReducer = combineReducers({
   role: roleReducer,
   permission: permissionReducer,
   competition: competitionReducer,
+  club: clubReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

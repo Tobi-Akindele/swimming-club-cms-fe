@@ -6,7 +6,7 @@ const UserUpdateItem = styled.div`
   display: flex;
   flex-direction: column;
   margin: 10px;
-  width: 350px;
+  width: ${(props) => props.width};
 `;
 
 const Label = styled.label``;
@@ -24,7 +24,7 @@ const Input = styled.input`
 const Radio = (props) => {
   const { label, name, options, value, ...others } = props;
   return (
-    <UserUpdateItem>
+    <UserUpdateItem width={props.width}>
       <Label>{label}</Label>
       <div>
         <Field name={name}>

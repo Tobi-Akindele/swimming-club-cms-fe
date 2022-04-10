@@ -20,19 +20,6 @@ const roleSlice = createSlice({
       state.isFetching = false;
       state.error = true;
     },
-    //Get Role by Name
-    getRoleByNameStart: (state) => {
-      state.isFetchingByName = true;
-      state.error = false;
-    },
-    getRoleByNameSuccess: (state, action) => {
-      state.isFetchingByName = false;
-      state.name = action.payload;
-    },
-    getRoleByNameFailure: (state) => {
-      state.isFetchingByName = false;
-      state.error = true;
-    },
     //Create Role
     createRoleStart: (state) => {
       state.isFetching = true;
@@ -66,9 +53,6 @@ export const {
   getRolesStart,
   getRolesSuccess,
   getRolesFailure,
-  getRoleByNameStart,
-  getRoleByNameSuccess,
-  getRoleByNameFailure,
   createRoleStart,
   createRoleSuccess,
   createRoleFailure,

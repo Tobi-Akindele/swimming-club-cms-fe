@@ -10,9 +10,6 @@ import {
   createRoleFailure,
   createRoleStart,
   createRoleSuccess,
-  getRoleByNameFailure,
-  getRoleByNameStart,
-  getRoleByNameSuccess,
 } from '../../redux/roleRedux';
 import { openRequest } from '../../apiRequests';
 import TextField from '../../components/formComponents/TextField';
@@ -32,11 +29,10 @@ const CreateRoleContainer = styled.div`
 
 const RoleUpdate = styled.div`
   flex: 2;
-  width: 50%;
+  width: 35%;
   padding: 20px;
   -webkit-box-shadow: 0px 0px 15px -10px rgba(0, 0, 0, 0.75);
   box-shadow: 0px 0px 15px -10px rgba(0, 0, 0, 0.75);
-  /* margin-left: 20px; */
   margin: auto;
 `;
 
@@ -53,7 +49,7 @@ const RoleUpdateContainer = styled.div`
 
 const ButtonContainer = styled.div`
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   margin: 10px;
 `;
 
@@ -64,7 +60,6 @@ const ButtonUpdate = styled.button`
   color: white;
   font-weight: 600;
   cursor: pointer;
-  width: 15%;
   &:disabled {
     cursor: not-allowed;
   }
@@ -87,13 +82,10 @@ const CreateRole = () => {
           name: value,
         },
       };
-      dispatch(getRoleByNameStart());
       try {
-        const r = await openRequest.get('/role/name', config);
-        dispatch(getRoleByNameSuccess(r.data));
+        await openRequest.get('/role/name', config);
         return createError({ path, message: eMessage });
       } catch (error) {
-        dispatch(getRoleByNameFailure());
         return true;
       }
     });

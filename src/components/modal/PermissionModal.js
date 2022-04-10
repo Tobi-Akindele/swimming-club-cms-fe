@@ -70,7 +70,7 @@ const SearchContainer = styled.div`
 const SubmitContainer = styled.div`
   display: flex;
   margin: 15px 10px;
-  justify-content: flex-end;
+  justify-content: center;
 `;
 
 const ButtonCreate = styled.button`
@@ -80,7 +80,6 @@ const ButtonCreate = styled.button`
   cursor: pointer;
   color: white;
   font-size: 15px;
-  width: 15%;
   &:disabled {
     cursor: not-allowed;
   }
