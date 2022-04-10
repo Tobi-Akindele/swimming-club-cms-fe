@@ -21,7 +21,7 @@ const Background = styled.div`
 `;
 
 const ModalWrapper = styled.div`
-  width: 60%;
+  width: 40%;
   height: 80%;
   box-shadow: 0 5px 16px rgba(0, 0, 0, 0.2);
   background: #fff;
@@ -59,7 +59,7 @@ const closeModalIcon = {
 
 const ButtonContainer = styled.div`
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   margin: 10px;
 `;
 
@@ -117,8 +117,9 @@ const EventResultModal = ({ showModal, setShowModal, participants, event }) => {
           firstName: participants[k].firstName,
           lastName: participants[k].lastName,
           username: participants[k].username,
-          time: '',
-          finalPoint: 0,
+          time: participants[k]?.time,
+          finalPoint: participants[k]?.finalPoint,
+          resultId: participants[k]?.resultId,
         };
       })
     : [];
@@ -179,6 +180,9 @@ const EventResultModal = ({ showModal, setShowModal, participants, event }) => {
                       setIsSubmitting(false);
                       resetForm({});
                       toast.success('Results recorded successfully');
+                      setTimeout(() => {
+                        window.location.reload();
+                      }, 2000);
                     })
                     .catch((err) => {
                       setIsSubmitting(false);
@@ -210,12 +214,14 @@ const EventResultModal = ({ showModal, setShowModal, participants, event }) => {
                                   label='Time'
                                   type='text'
                                   placeholder='00:00:00'
+                                  width='350px'
                                 />
                                 <TextField
                                   name={`results[${index}].finalPoint`}
                                   label='Final Point'
                                   type='number'
                                   placeholder='0'
+                                  width='350px'
                                 />
                               </ResultContainerRight>
                             </ResultContainer>

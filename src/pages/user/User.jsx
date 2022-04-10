@@ -177,7 +177,7 @@ const UserUpdateContainer = styled.div`
 
 const RegContainer = styled.div`
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   margin: 10px;
 `;
 
@@ -440,6 +440,7 @@ const User = () => {
                           options={userTypes}
                           loading={isFetchingUserTypes}
                           value={user.userType._id}
+                          width='350px'
                         />
                         <Select
                           label='User Role'
@@ -447,48 +448,56 @@ const User = () => {
                           options={roles}
                           loading={isFetchingRoles}
                           value={user.role._id}
+                          width='350px'
                         />
                         <TextField
                           name='firstName'
                           type='text'
                           placeholder={user.firstName}
                           label='First Name'
+                          width='350px'
                         />
                         <TextField
                           name='lastName'
                           type='text'
                           placeholder={user.lastName}
                           label='Last Name'
+                          width='350px'
                         />
                         <TextField
                           name='middleName'
                           type='text'
                           placeholder={user.middleName}
                           label='Middle Name'
+                          width='350px'
                         />
                         <TextField
                           name='dateOfBirth'
                           type='date'
                           label='Date of Birth'
                           value={user.dateOfBirth.split('T')[0]}
+                          width='350px'
                         />
                         <TextField
                           name='phoneNumber'
                           type='text'
                           placeholder={user.phoneNumber}
                           label='Phone Number'
+                          width='350px'
                         />
                         <TextField
                           name='address'
                           type='text'
                           placeholder={user.address}
                           label='Address'
+                          width='350px'
                         />
                         <Radio
                           label='Gender'
                           name='gender'
                           options={genderOptions}
                           value={user.gender}
+                          width='350px'
                         />
                       </UserUpdateLeft>
                       <RegContainer>

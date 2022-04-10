@@ -8,7 +8,7 @@ const UserUpdateItem = styled.div`
   display: flex;
   flex-direction: column;
   margin: 10px;
-  width: 350px;
+  width: ${(props) => props.width};
 `;
 
 const Label = styled.label``;
@@ -22,7 +22,7 @@ const selectStyle = {
 const Select = (props) => {
   const { label, name, options, loading, value, ...others } = props;
   return (
-    <UserUpdateItem>
+    <UserUpdateItem width={props.width}>
       <Label htmlFor={name}>{label}</Label>
       <Field
         as='select'

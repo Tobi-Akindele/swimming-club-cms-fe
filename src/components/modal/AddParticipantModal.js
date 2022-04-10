@@ -9,12 +9,12 @@ import styled from 'styled-components';
 import { openRequest } from '../../apiRequests';
 import * as Yup from 'yup';
 import { setAuthToken } from '../../utils';
-import TextField from '../formComponents/TextField';
 import {
   addEventParticipantFailure,
   addEventParticipantStart,
   addEventParticipantSuccess,
 } from '../../redux/competitionRedux';
+import DataListInput from '../formComponents/DataListInput';
 
 const Background = styled.div`
   width: 100%;
@@ -64,7 +64,7 @@ const closeModalIcon = {
 
 const ButtonContainer = styled.div`
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   margin: 10px;
 `;
 
@@ -98,8 +98,28 @@ const AddParticipantModal = ({
   };
 
   const validate = Yup.object({
-    username: Yup.string().min(2, 'Too short').required('Username is required'),
+    userId: Yup.string().required('Username is required'),
   });
+
+  const loadOptions = async (inputText, callback) => {
+    let config = {
+      headers: {
+        username: inputText,
+        userType: 'swimmer',
+      },
+    };
+    try {
+      const response = await openRequest.get('/users/search/type', config);
+      const json = await response.data;
+
+      callback(
+        json.map((item) => ({
+          label: `${item.username} (${item.firstName} ${item.lastName})`,
+          value: item._id,
+        }))
+      );
+    } catch (error) {}
+  };
 
   return (
     <>
@@ -123,12 +143,12 @@ const AddParticipantModal = ({
 
             <ModalContentBottom>
               <Formik
-                initialValues={{ username: '' }}
+                initialValues={{ userId: '' }}
                 validationSchema={validate}
                 onSubmit={(values, { resetForm }) => {
                   const payload = {
                     eventId: eventId,
-                    participant: values.username,
+                    participantId: values.userId,
                   };
                   dispatch(addEventParticipantStart());
                   openRequest
@@ -160,11 +180,18 @@ const AddParticipantModal = ({
               >
                 {(formik) => (
                   <Form>
-                    <TextField
-                      name='username'
+                    <DataListInput
+                      value={formik.values.userId}
+                      name='userId'
                       type='text'
-                      placeholder='john.doe123'
-                      label='Participant Username'
+                      placeholder='Search Swimmers'
+                      label='Participant'
+                      onChange={formik.setFieldValue}
+                      onBlur={formik.setFieldTouched}
+                      loadOptions={loadOptions}
+                      error={formik.errors.userId}
+                      touched={formik.touched.userId}
+                      width='350px'
                     />
                     <ButtonContainer>
                       <ButtonUpdate

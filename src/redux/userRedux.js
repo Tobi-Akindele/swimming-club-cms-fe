@@ -20,32 +20,6 @@ const userSlice = createSlice({
       state.isFetching = false;
       state.error = true;
     },
-    //Get User by Username
-    getUserByUsernameStart: (state) => {
-      state.isFetchingUsername = true;
-      state.error = false;
-    },
-    getUserByUsernameSuccess: (state, action) => {
-      state.isFetchingUsername = false;
-      state.username = action.payload;
-    },
-    getUserByUsernameFailure: (state) => {
-      state.isFetchingUsername = false;
-      state.error = true;
-    },
-    //Get User by Email
-    getUserByEmailStart: (state) => {
-      state.isFetchingEmail = true;
-      state.error = false;
-    },
-    getUserByEmailSuccess: (state, action) => {
-      state.isFetchingEmail = false;
-      state.email = action.payload;
-    },
-    getUserByEmailFailure: (state) => {
-      state.isFetchingEmail = false;
-      state.error = true;
-    },
     //Register User
     registerUserStart: (state) => {
       state.isFetching = true;
@@ -81,12 +55,6 @@ export const {
   getUsersStart,
   getUsersSuccess,
   getUsersFailure,
-  getUserByUsernameStart,
-  getUserByUsernameSuccess,
-  getUserByUsernameFailure,
-  getUserByEmailStart,
-  getUserByEmailSuccess,
-  getUserByEmailFailure,
   registerUserStart,
   registerUserSuccess,
   registerUserFailure,

@@ -103,7 +103,7 @@ const Sidebar = () => {
                 Competitions
               </SidebarListItem>
             </Link>
-            <Link to='/' className='link'>
+            <Link to='/clubs' className='link'>
               <SidebarListItem>
                 <FontAwesomeIcon
                   style={sidebarIconStyles}

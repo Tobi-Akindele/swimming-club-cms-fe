@@ -153,7 +153,7 @@ const UserTypes = () => {
           <CreateUserTypeContainer>
             <CreateUserContainerTitle>User Types</CreateUserContainerTitle>
             <Link to='/'>
-              <ButtonCreate>Create</ButtonCreate>
+              <ButtonCreate disabled>Create</ButtonCreate>
             </Link>
           </CreateUserTypeContainer>
           <DataGrid

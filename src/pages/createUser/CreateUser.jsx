@@ -6,12 +6,6 @@ import { openRequest } from '../../apiRequests';
 import Sidebar from '../../components/sidebar/Sidebar';
 import Topbar from '../../components/topbar/Topbar';
 import {
-  getUserByEmailFailure,
-  getUserByEmailStart,
-  getUserByEmailSuccess,
-  getUserByUsernameFailure,
-  getUserByUsernameStart,
-  getUserByUsernameSuccess,
   registerUserFailure,
   registerUserStart,
   registerUserSuccess,
@@ -94,7 +88,6 @@ const ButtonUpdate = styled.button`
   color: white;
   font-weight: 600;
   cursor: pointer;
-  width: 15%;
   &:disabled {
     cursor: not-allowed;
   }
@@ -102,7 +95,7 @@ const ButtonUpdate = styled.button`
 
 const RegContainer = styled.div`
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   margin: 10px;
 `;
 
@@ -133,13 +126,10 @@ const CreateUser = () => {
           username: value,
         },
       };
-      dispatch(getUserByUsernameStart());
       try {
-        const r = await openRequest.get('/user/username', config);
-        dispatch(getUserByUsernameSuccess(r.data));
+        await openRequest.get('/user/username', config);
         return createError({ path, message: eMessage });
       } catch (error) {
-        dispatch(getUserByUsernameFailure());
         return true;
       }
     });
@@ -162,13 +152,10 @@ const CreateUser = () => {
           email: value,
         },
       };
-      dispatch(getUserByEmailStart());
       try {
-        const r = await openRequest.get('/user/email', config);
-        dispatch(getUserByEmailSuccess(r.data));
+        await openRequest.get('/user/email', config);
         return createError({ path, message: eMessage });
       } catch (error) {
-        dispatch(getUserByEmailFailure());
         return true;
       }
     });
@@ -327,69 +314,81 @@ const CreateUser = () => {
                         name='userTypeId'
                         options={userTypes}
                         loading={isFetchingUserTypes}
+                        width='350px'
                       />
                       <Select
                         label='User Role'
                         name='roleId'
                         options={roles}
                         loading={isFetchingRoles}
+                        width='350px'
                       />
                       <TextField
                         name='username'
                         type='text'
                         placeholder='john.doe123'
                         label='Username'
+                        width='350px'
                       />
                       <TextField
                         name='email'
                         type='email'
                         placeholder='john.doe@example.com'
                         label='Email'
+                        width='350px'
                       />
                       <TextField
                         name='firstName'
                         type='text'
                         placeholder='John'
                         label='First Name'
+                        width='350px'
                       />
                       <TextField
                         name='lastName'
                         type='text'
                         placeholder='Doe'
                         label='Last Name'
+                        width='350px'
                       />
                       <TextField
                         name='middleName'
                         type='text'
                         placeholder='Smith'
                         label='Middle Name'
+                        width='350px'
                       />
                       <TextField
                         name='dateOfBirth'
                         type='date'
                         label='Date of Birth'
+                        width='350px'
                       />
                       <TextField
                         name='phoneNumber'
                         type='text'
                         placeholder='+447123456789'
                         label='Phone Number'
+                        width='350px'
                       />
                       <TextField
                         name='address'
                         type='text'
                         placeholder='1, Fake st, Fake Town, AQ8 9QT | UK'
                         label='Address'
+                        width='350px'
                       />
                       <Radio
                         label='Admin'
                         name='isAdmin'
                         options={adminOptions}
+                        width='350px'
                       />
                       <Radio
                         label='Gender'
                         name='gender'
                         options={genderOptions}
+                        width='350px'
                       />
                     </UserUpdateLeft>
                     <RegContainer>
