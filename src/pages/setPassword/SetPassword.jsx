@@ -143,12 +143,14 @@ const SetPassword = () => {
                   type='password'
                   placeholder='Password'
                   label='Password'
+                  width='350px'
                 />
                 <TextField
                   name='confirmPassword'
                   type='password'
                   placeholder='Confirm Password'
                   label='Confirm Password'
+                  width='350px'
                 />
                 <ButtonContainer>
                   <Button

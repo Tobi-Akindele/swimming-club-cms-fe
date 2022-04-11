@@ -96,7 +96,7 @@ const CreateClub = () => {
   const validate = Yup.object({
     name: Yup.string()
       .min(2, 'Too short')
-      .isUniqueName('Role is taken')
+      .isUniqueName('Club is taken')
       .required('Club name is required'),
     coachId: Yup.string()
       .min(3, 'Please enter at least 3 characters')
@@ -170,7 +170,6 @@ const CreateClub = () => {
               >
                 {(formik) => (
                   <Form>
-                    {console.log(formik.values)}
                     <TextField
                       name='name'
                       type='text'
