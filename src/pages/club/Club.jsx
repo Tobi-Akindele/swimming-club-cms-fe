@@ -1,4 +1,8 @@
-import { faAngleLeft, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import {
+  faAngleLeft,
+  faSpinner,
+  faPenToSquare,
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DataGrid } from '@mui/x-data-grid';
 import { useEffect, useState } from 'react';
@@ -10,6 +14,7 @@ import { format } from 'timeago.js';
 import { openRequest } from '../../apiRequests';
 import SearchInput from '../../components/formComponents/SearchInput';
 import AddClubMemberModal from '../../components/modal/AddClubMemberModal';
+import UpdateClubModal from '../../components/modal/UpdateClub';
 import Sidebar from '../../components/sidebar/Sidebar';
 import Topbar from '../../components/topbar/Topbar';
 import { calculateAge, setAuthToken } from '../../utils';
@@ -38,6 +43,11 @@ const ClubDetailContainer = styled.div`
   padding: 20px;
   -webkit-box-shadow: 0px 0px 15px -10px rgba(0, 0, 0, 0.75);
   box-shadow: 0px 0px 15px -10px rgba(0, 0, 0, 0.75);
+`;
+
+const ClubDetailTitleContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
 `;
 
 const ClubDetailTitle = styled.span`
@@ -150,11 +160,12 @@ const Club = () => {
   const location = useLocation();
   const clubId = location.pathname.split('/')[2];
   const club = useSelector((state) =>
-    state.club.clubs.find((club) => club._id === clubId)
+    state.club?.clubs?.find((club) => club._id === clubId)
   );
   const currentUser = useSelector((state) => state.login?.currentUser);
   const [query, setQuery] = useState('');
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
   const [members, setMembers] = useState([]);
   const [coach, setCoach] = useState([]);
@@ -213,9 +224,14 @@ const Club = () => {
 
   const columns = [
     {
+      field: '_id',
+      headerName: 'ID',
+      width: 250,
+    },
+    {
       field: 'name',
       headerName: 'Name',
-      width: 200,
+      width: 250,
       renderCell: (params) => {
         return (
           <MemberCellContainer>
@@ -234,12 +250,12 @@ const Club = () => {
     {
       field: 'username',
       headerName: 'Username',
-      width: 200,
+      width: 250,
     },
     {
       field: 'age',
       headerName: 'Age',
-      width: 200,
+      width: 250,
       renderCell: (params) => {
         return (
           <span>
@@ -252,7 +268,7 @@ const Club = () => {
     {
       field: 'gender',
       headerName: 'Gender',
-      width: 200,
+      width: 250,
     },
   ];
 
@@ -261,14 +277,23 @@ const Club = () => {
     setShowAddMemberModal((prev) => !prev);
   };
 
+  const openUpdateModal = (e) => {
+    e.preventDefault();
+    setShowUpdateModal((prev) => !prev);
+  };
+
   const handleDeleteEvent = (e) => {
     e.preventDefault();
     const payload = {
-      eventId: clubId,
-      members: selectedRows,
+      clubId: clubId,
+      memberIds: selectedRows,
     };
     openRequest
-      .post('/remove/members', payload, setAuthToken(currentUser.accessToken))
+      .post(
+        '/club/remove/members',
+        payload,
+        setAuthToken(currentUser.accessToken)
+      )
       .then((result) => {
         toast.success('Members(s) removed successfully');
         setTimeout(() => {
@@ -296,14 +321,23 @@ const Club = () => {
             </ButtonDelete>
           </ClubTitleContainer>
           <ClubDetailContainer>
-            <ClubDetailTitle>Club Details</ClubDetailTitle>
+            <ClubDetailTitleContainer>
+              <ClubDetailTitle>Club Details</ClubDetailTitle>
+              <FontAwesomeIcon
+                icon={faPenToSquare}
+                title='Edit Club'
+                fontSize='25px'
+                cursor='pointer'
+                onClick={openUpdateModal}
+              />
+            </ClubDetailTitleContainer>
             <ClubDetailInfo>
               Name:
-              <ClubDetailText>{club.name}</ClubDetailText>
+              <ClubDetailText>{club?.name}</ClubDetailText>
             </ClubDetailInfo>
             <ClubDetailInfo>
               Created:
-              <ClubDetailText>{format(club._created)}</ClubDetailText>
+              <ClubDetailText>{format(club?._created)}</ClubDetailText>
             </ClubDetailInfo>
             <ClubDetailInfo>
               Club Size:
@@ -311,13 +345,7 @@ const Club = () => {
             </ClubDetailInfo>
 
             <ShowCoachInfo>
-              <ShowCoachImage
-                src={
-                  coach?.image ||
-                  'https://crowd-literature.eu/wp-content/uploads/2015/01/no-avatar.gif'
-                }
-                alt='coach picture'
-              />
+              <ShowCoachImage src={coach?.image} alt='coach picture' />
               <ShowCoachTitle>
                 <ShowCoachUsername>
                   {coach?.firstName} {coach?.lastName?.toUpperCase()}{' '}
@@ -370,6 +398,7 @@ const Club = () => {
                     },
                   }}
                   autoHeight
+                  checkboxSelection
                   pageSize={5}
                   rowsPerPageOptions={[5, 10]}
                   onSelectionModelChange={(ids) => {
@@ -380,10 +409,18 @@ const Club = () => {
             </Members>
           </MembersContainer>
         </ClubContainer>
+
+        {/* Modals */}
         <AddClubMemberModal
           showModal={showAddMemberModal}
           setShowModal={setShowAddMemberModal}
           clubId={clubId}
+        />
+        <UpdateClubModal
+          showModal={showUpdateModal}
+          setShowModal={setShowUpdateModal}
+          club={club}
+          coach={coach}
         />
       </Container>
     </>

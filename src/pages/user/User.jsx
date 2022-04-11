@@ -280,32 +280,56 @@ const User = () => {
               <UserShowBottom>
                 <UserShowTitle>User Details</UserShowTitle>
                 <UserShowInfo>
-                  <FontAwesomeIcon icon={faUser} style={userShowIcon} />
+                  <FontAwesomeIcon
+                    icon={faUser}
+                    style={userShowIcon}
+                    title='username'
+                  />
                   <UserShowInfoTitle>{user.username}</UserShowInfoTitle>
                 </UserShowInfo>
                 <UserShowInfo>
-                  <FontAwesomeIcon icon={faCalendar} style={userShowIcon} />
+                  <FontAwesomeIcon
+                    icon={faCalendar}
+                    style={userShowIcon}
+                    title='date of birth'
+                  />
                   <UserShowInfoTitle>
                     {moment(user.dateOfBirth).format('MMMM Do YYYY')}{' '}
                     {'(' + calculateAge(user.dateOfBirth) + ' years)'}
                   </UserShowInfoTitle>
                 </UserShowInfo>
                 <UserShowInfo>
-                  <FontAwesomeIcon icon={faPerson} style={userShowIcon} />
+                  <FontAwesomeIcon
+                    icon={faPerson}
+                    style={userShowIcon}
+                    title='gender'
+                  />
                   <UserShowInfoTitle>{user.gender}</UserShowInfoTitle>
                 </UserShowInfo>
 
                 <UserShowTitle>Contact Details</UserShowTitle>
                 <UserShowInfo>
-                  <FontAwesomeIcon icon={faAt} style={userShowIcon} />
+                  <FontAwesomeIcon
+                    icon={faAt}
+                    style={userShowIcon}
+                    title='email'
+                  />
                   <UserShowInfoTitle>{user.email}</UserShowInfoTitle>
                 </UserShowInfo>
                 <UserShowInfo>
-                  <FontAwesomeIcon icon={faPhone} style={userShowIcon} />
+                  <FontAwesomeIcon
+                    icon={faPhone}
+                    style={userShowIcon}
+                    title='phone'
+                  />
                   <UserShowInfoTitle>{user.phoneNumber}</UserShowInfoTitle>
                 </UserShowInfo>
                 <UserShowInfo>
-                  <FontAwesomeIcon icon={faLocationDot} style={userShowIcon} />
+                  <FontAwesomeIcon
+                    icon={faLocationDot}
+                    style={userShowIcon}
+                    title='address'
+                  />
                   <UserShowInfoTitle>{user.address}</UserShowInfoTitle>
                 </UserShowInfo>
 
@@ -335,7 +359,7 @@ const User = () => {
                             icon={faCheck}
                             style={{ color: '#3bb077' }}
                           />{' '}
-                          Active
+                          Verified
                         </>
                       ) : (
                         <>
@@ -343,7 +367,7 @@ const User = () => {
                             icon={faTriangleExclamation}
                             style={{ color: 'red' }}
                           />{' '}
-                          Inactive
+                          Unverified
                         </>
                       )}
                     </span>
@@ -406,7 +430,7 @@ const User = () => {
                         setAuthToken(currentUser.accessToken)
                       )
                       .then((result) => {
-                        // resetForm({});
+                        resetForm({});
                         dispatch(updateUserSuccess(result.data));
                         toast.success('Update successful');
                       })

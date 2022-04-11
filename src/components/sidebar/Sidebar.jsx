@@ -93,13 +93,18 @@ const Sidebar = () => {
                 <FontAwesomeIcon
                   style={sidebarIconStyles}
                   icon={faHouseChimney}
+                  title='Home'
                 />
                 Home
               </SidebarListItem>
             </Link>
             <Link to='/competitions' className='link'>
               <SidebarListItem>
-                <FontAwesomeIcon style={sidebarIconStyles} icon={faMedal} />
+                <FontAwesomeIcon
+                  style={sidebarIconStyles}
+                  icon={faMedal}
+                  title='Competitions'
+                />
                 Competitions
               </SidebarListItem>
             </Link>
@@ -108,6 +113,7 @@ const Sidebar = () => {
                 <FontAwesomeIcon
                   style={sidebarIconStyles}
                   icon={faUsersBetweenLines}
+                  title='Clubs'
                 />
                 Clubs
               </SidebarListItem>
@@ -117,6 +123,7 @@ const Sidebar = () => {
                 <FontAwesomeIcon
                   style={sidebarIconStyles}
                   icon={faPersonSwimming}
+                  title='Training Data'
                 />
                 Training Data
               </SidebarListItem>
@@ -127,15 +134,23 @@ const Sidebar = () => {
         <SidebarMenu>
           <SidebarTitle>User Management</SidebarTitle>
           <SidebarList>
-            <Link to='/users' className='link'>
+            <Link to='/profile' className='link'>
               <SidebarListItem>
-                <FontAwesomeIcon style={sidebarIconStyles} icon={faUserLarge} />
+                <FontAwesomeIcon
+                  style={sidebarIconStyles}
+                  icon={faUserLarge}
+                  title='Profile'
+                />
                 Profile
               </SidebarListItem>
             </Link>
             <Link to='/users' className='link'>
               <SidebarListItem>
-                <FontAwesomeIcon style={sidebarIconStyles} icon={faUserGroup} />
+                <FontAwesomeIcon
+                  style={sidebarIconStyles}
+                  icon={faUserGroup}
+                  title='Users'
+                />
                 Users
               </SidebarListItem>
             </Link>
@@ -144,6 +159,7 @@ const Sidebar = () => {
                 <FontAwesomeIcon
                   style={sidebarIconStyles}
                   icon={faAddressCard}
+                  title='User Types'
                 />
                 {` `}
                 Users Types
@@ -154,6 +170,7 @@ const Sidebar = () => {
                 <FontAwesomeIcon
                   style={sidebarIconStyles}
                   icon={faFingerprint}
+                  title='Roles'
                 />
                 {` `}
                 Roles
@@ -169,6 +186,7 @@ const Sidebar = () => {
               <FontAwesomeIcon
                 style={sidebarIconStyles}
                 icon={faRightToBracket}
+                title='Logout'
               />
               Logout
             </SidebarListItem>

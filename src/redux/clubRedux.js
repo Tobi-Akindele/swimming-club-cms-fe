@@ -33,6 +33,21 @@ const clubSlice = createSlice({
       state.isFetching = false;
       state.error = true;
     },
+    //Update Club
+    updateClubStart: (state) => {
+      state.isFetching = true;
+      state.error = false;
+    },
+    updateClubSuccess: (state, action) => {
+      state.isFetching = false;
+      state.clubs[
+        state.clubs.findIndex((item) => item._id === action.payload._id)
+      ] = action.payload;
+    },
+    updateClubFailure: (state) => {
+      state.isFetching = false;
+      state.error = true;
+    },
   },
 });
 
@@ -43,6 +58,9 @@ export const {
   createClubStart,
   createClubSuccess,
   createClubFailure,
+  updateClubStart,
+  updateClubSuccess,
+  updateClubFailure,
 } = clubSlice.actions;
 
 export default clubSlice.reducer;

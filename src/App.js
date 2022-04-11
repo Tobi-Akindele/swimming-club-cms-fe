@@ -17,6 +17,7 @@ import CreateUser from './pages/createUser/CreateUser';
 import Dashboard from './pages/dashboard/Dashboard';
 import Event from './pages/event/Event';
 import Login from './pages/login/Login';
+import Profile from './pages/profile/Profile';
 import Role from './pages/role/Role';
 import Roles from './pages/roles/Roles';
 import SetPassword from './pages/setPassword/SetPassword';
@@ -92,6 +93,10 @@ const App = () => {
         <Route
           path='/create/club'
           element={currentUser ? <CreateClub /> : <Navigate to='/' />}
+        />
+        <Route
+          path='/profile'
+          element={currentUser ? <Profile /> : <Navigate to='/' />}
         />
         <Route path='/set-password/:activationCode' element={<SetPassword />} />
       </Routes>
