@@ -16,6 +16,7 @@ import {
   faCheck,
   faTriangleExclamation,
   faSpinner,
+  faPenToSquare,
 } from '@fortawesome/free-solid-svg-icons';
 import moment from 'moment';
 import { format } from 'timeago.js';
@@ -49,6 +50,8 @@ import {
   updateUserStart,
   updateUserSuccess,
 } from '../../redux/userRedux';
+import AddChildModal from '../../components/modal/AddChildModal';
+import WidgetSm from '../../components/widgetSm/WidgetSm';
 
 const Container = styled.div`
   display: flex;
@@ -73,8 +76,14 @@ const UserShowContainer = styled.div`
   margin-top: 20px;
 `;
 
-const UserShow = styled.div`
+const LeftContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   flex: 1;
+`;
+
+const UserShow = styled.div`
   padding: 20px;
   -webkit-box-shadow: 0px 0px 15px -10px rgba(0, 0, 0, 0.75);
   box-shadow: 0px 0px 15px -10px rgba(0, 0, 0, 0.75);
@@ -149,6 +158,7 @@ const UserUpdateLeft = styled.div`
   flex-wrap: wrap;
   justify-content: space-around;
   width: 80%;
+  margin: 0px auto;
 `;
 
 const UserUpdateRight = styled.div`
@@ -197,6 +207,10 @@ const User = () => {
   );
   const { isFetching: isUpdating } = useSelector((state) => state.user);
   const [file, setFile] = useState(null);
+  const [showAddChildModal, setShowAddChildModal] = useState(false);
+  const [parents, setParents] = useState([]);
+  const [children, setChildren] = useState([]);
+  const [isFetchingPC, setIsFetchingPC] = useState(false);
 
   useEffect(() => {
     //User types
@@ -224,6 +238,20 @@ const User = () => {
       });
   }, [dispatch, currentUser]);
 
+  useEffect(() => {
+    setIsFetchingPC(true);
+    openRequest
+      .get(`/user/${userId}`, setAuthToken(currentUser?.accessToken))
+      .then((result) => {
+        setIsFetchingPC(false);
+        setParents(result.data?.parents);
+        setChildren(result.data?.children);
+      })
+      .catch((err) => {
+        setIsFetchingPC(false);
+      });
+  }, [userId, currentUser]);
+
   const validate = Yup.object({
     firstName: Yup.string()
       .min(2, 'Too short')
@@ -238,6 +266,11 @@ const User = () => {
     roleId: Yup.string().required('Required'),
     gender: Yup.string().required('Required'),
   });
+
+  const openAddChildModal = (e) => {
+    e.preventDefault();
+    setShowAddChildModal((prev) => !prev);
+  };
 
   return (
     <>
@@ -260,124 +293,147 @@ const User = () => {
             <UserTitle>User</UserTitle>
           </UserTitleContainer>
           <UserShowContainer>
-            <UserShow>
-              <UserShowTop>
-                <UserShowImg
-                  src={
-                    user?.image ||
-                    'https://crowd-literature.eu/wp-content/uploads/2015/01/no-avatar.gif'
-                  }
-                  alt='user picture'
-                />
-                <UserShowTopTitle>
-                  <UserShowUsername>
-                    {user?.firstName} {user?.lastName.toUpperCase()}{' '}
-                    {user.middleName}
-                  </UserShowUsername>
-                  <UserShowUserType>{user?.userType?.name}</UserShowUserType>
-                </UserShowTopTitle>
-              </UserShowTop>
-              <UserShowBottom>
-                <UserShowTitle>User Details</UserShowTitle>
-                <UserShowInfo>
-                  <FontAwesomeIcon
-                    icon={faUser}
-                    style={userShowIcon}
-                    title='username'
+            <LeftContainer>
+              <UserShow>
+                <UserShowTop>
+                  <UserShowImg
+                    src={
+                      user?.image ||
+                      'https://crowd-literature.eu/wp-content/uploads/2015/01/no-avatar.gif'
+                    }
+                    alt='user picture'
                   />
-                  <UserShowInfoTitle>{user.username}</UserShowInfoTitle>
-                </UserShowInfo>
-                <UserShowInfo>
-                  <FontAwesomeIcon
-                    icon={faCalendar}
-                    style={userShowIcon}
-                    title='date of birth'
-                  />
-                  <UserShowInfoTitle>
-                    {moment(user.dateOfBirth).format('MMMM Do YYYY')}{' '}
-                    {'(' + calculateAge(user.dateOfBirth) + ' years)'}
-                  </UserShowInfoTitle>
-                </UserShowInfo>
-                <UserShowInfo>
-                  <FontAwesomeIcon
-                    icon={faPerson}
-                    style={userShowIcon}
-                    title='gender'
-                  />
-                  <UserShowInfoTitle>{user.gender}</UserShowInfoTitle>
-                </UserShowInfo>
+                  <UserShowTopTitle>
+                    <UserShowUsername>
+                      {user?.firstName} {user?.lastName.toUpperCase()}{' '}
+                      {user.middleName}
+                    </UserShowUsername>
+                    <UserShowUserType>{user?.userType?.name}</UserShowUserType>
+                  </UserShowTopTitle>
+                </UserShowTop>
+                <UserShowBottom>
+                  <UserShowTitle>User Details</UserShowTitle>
+                  <UserShowInfo>
+                    <FontAwesomeIcon
+                      icon={faUser}
+                      style={userShowIcon}
+                      title='username'
+                    />
+                    <UserShowInfoTitle>{user.username}</UserShowInfoTitle>
+                  </UserShowInfo>
+                  <UserShowInfo>
+                    <FontAwesomeIcon
+                      icon={faCalendar}
+                      style={userShowIcon}
+                      title='date of birth'
+                    />
+                    <UserShowInfoTitle>
+                      {moment(user.dateOfBirth).format('MMMM Do YYYY')}{' '}
+                      {'(' + calculateAge(user.dateOfBirth) + ' years)'}
+                    </UserShowInfoTitle>
+                  </UserShowInfo>
+                  <UserShowInfo>
+                    <FontAwesomeIcon
+                      icon={faPerson}
+                      style={userShowIcon}
+                      title='gender'
+                    />
+                    <UserShowInfoTitle>{user.gender}</UserShowInfoTitle>
+                  </UserShowInfo>
 
-                <UserShowTitle>Contact Details</UserShowTitle>
-                <UserShowInfo>
-                  <FontAwesomeIcon
-                    icon={faAt}
-                    style={userShowIcon}
-                    title='email'
-                  />
-                  <UserShowInfoTitle>{user.email}</UserShowInfoTitle>
-                </UserShowInfo>
-                <UserShowInfo>
-                  <FontAwesomeIcon
-                    icon={faPhone}
-                    style={userShowIcon}
-                    title='phone'
-                  />
-                  <UserShowInfoTitle>{user.phoneNumber}</UserShowInfoTitle>
-                </UserShowInfo>
-                <UserShowInfo>
-                  <FontAwesomeIcon
-                    icon={faLocationDot}
-                    style={userShowIcon}
-                    title='address'
-                  />
-                  <UserShowInfoTitle>{user.address}</UserShowInfoTitle>
-                </UserShowInfo>
+                  <UserShowTitle>Contact Details</UserShowTitle>
+                  <UserShowInfo>
+                    <FontAwesomeIcon
+                      icon={faAt}
+                      style={userShowIcon}
+                      title='email'
+                    />
+                    <UserShowInfoTitle>{user.email}</UserShowInfoTitle>
+                  </UserShowInfo>
+                  <UserShowInfo>
+                    <FontAwesomeIcon
+                      icon={faPhone}
+                      style={userShowIcon}
+                      title='phone'
+                    />
+                    <UserShowInfoTitle>{user.phoneNumber}</UserShowInfoTitle>
+                  </UserShowInfo>
+                  <UserShowInfo>
+                    <FontAwesomeIcon
+                      icon={faLocationDot}
+                      style={userShowIcon}
+                      title='address'
+                    />
+                    <UserShowInfoTitle>{user.address}</UserShowInfoTitle>
+                  </UserShowInfo>
 
-                <UserShowTitle>Registered</UserShowTitle>
-                <UserShowInfo>
-                  <FontAwesomeIcon icon={faPen} style={userShowIcon} />
-                  <UserShowInfoTitle>
-                    {format(user._created)}{' '}
-                  </UserShowInfoTitle>
-                </UserShowInfo>
-                <UserShowInfo>
-                  Status
-                  <UserShowInfoTitle>
-                    <span
-                      style={{
-                        border: `1px solid ${user.active ? 'green' : 'red'}`,
-                        width: '70px',
-                        textAlign: 'center',
-                        borderRadius: '10px',
-                        padding: '10px',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {user.active ? (
-                        <>
-                          <FontAwesomeIcon
-                            icon={faCheck}
-                            style={{ color: '#3bb077' }}
-                          />{' '}
-                          Verified
-                        </>
-                      ) : (
-                        <>
-                          <FontAwesomeIcon
-                            icon={faTriangleExclamation}
-                            style={{ color: 'red' }}
-                          />{' '}
-                          Unverified
-                        </>
-                      )}
-                    </span>
-                  </UserShowInfoTitle>
-                </UserShowInfo>
-              </UserShowBottom>
-            </UserShow>
+                  <UserShowTitle>Registered</UserShowTitle>
+                  <UserShowInfo>
+                    <FontAwesomeIcon icon={faPen} style={userShowIcon} />
+                    <UserShowInfoTitle>
+                      {format(user._created)}{' '}
+                    </UserShowInfoTitle>
+                  </UserShowInfo>
+                  <UserShowInfo>
+                    Status
+                    <UserShowInfoTitle>
+                      <span
+                        style={{
+                          border: `1px solid ${user.active ? 'green' : 'red'}`,
+                          width: '70px',
+                          textAlign: 'center',
+                          borderRadius: '10px',
+                          padding: '10px',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {user.active ? (
+                          <>
+                            <FontAwesomeIcon
+                              icon={faCheck}
+                              style={{ color: '#3bb077' }}
+                            />{' '}
+                            Verified
+                          </>
+                        ) : (
+                          <>
+                            <FontAwesomeIcon
+                              icon={faTriangleExclamation}
+                              style={{ color: 'red' }}
+                            />{' '}
+                            Unverified
+                          </>
+                        )}
+                      </span>
+                    </UserShowInfoTitle>
+                  </UserShowInfo>
+                </UserShowBottom>
+              </UserShow>
+
+              {isFetchingPC ? (
+                <FontAwesomeIcon icon={faSpinner} fontSize='50px' spin />
+              ) : children?.length ? (
+                <WidgetSm title='Children' data={children} />
+              ) : null}
+
+              {isFetchingPC ? (
+                <FontAwesomeIcon icon={faSpinner} fontSize='50px' />
+              ) : parents?.length ? (
+                <WidgetSm title='Parents' data={parents} />
+              ) : null}
+            </LeftContainer>
 
             <UserUpdate>
-              <UserUpdateTitle>Edit</UserUpdateTitle>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <UserUpdateTitle>Edit</UserUpdateTitle>
+                <FontAwesomeIcon
+                  icon={faPenToSquare}
+                  title='Add Child'
+                  fontSize='25px'
+                  cursor='pointer'
+                  onClick={openAddChildModal}
+                />
+              </div>
               <UserUpdateContainer>
                 <Formik
                   initialValues={{
@@ -544,6 +600,11 @@ const User = () => {
             </UserUpdate>
           </UserShowContainer>
         </UserContainer>
+        <AddChildModal
+          showModal={showAddChildModal}
+          setShowModal={setShowAddChildModal}
+          parentId={userId}
+        />
       </Container>
     </>
   );
