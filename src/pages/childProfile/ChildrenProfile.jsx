@@ -1,22 +1,20 @@
 import {
+  faAngleLeft,
   faAt,
   faCalendar,
   faCheck,
-  faEye,
   faLocationDot,
   faMarsAndVenus,
   faPenToSquare,
   faPhone,
-  faSpinner,
   faTriangleExclamation,
   faUser,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { DataGrid } from '@mui/x-data-grid';
 import moment from 'moment';
+import { useLocation, useNavigate } from 'react-router';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import styled from 'styled-components';
 import { format } from 'timeago.js';
@@ -107,10 +105,8 @@ const userShowIcon = {
   fontSize: '16px !important',
 };
 
-const RemoveChildrenButtonContainer = styled.div`
+const ProfileTopContainer = styled.div`
   display: flex;
-  margin: 15px 0px;
-  justify-content: flex-end;
 `;
 
 const ButtonDelete = styled.button`
@@ -126,49 +122,13 @@ const ButtonDelete = styled.button`
   }
 `;
 
-const ChildrenContainer = styled.div`
-  flex-direction: column;
-  padding: 20px;
-  -webkit-box-shadow: 0px 0px 15px -10px rgba(0, 0, 0, 0.75);
-  box-shadow: 0px 0px 15px -10px rgba(0, 0, 0, 0.75);
-`;
-
-const ChildrenTitle = styled.h2``;
-
-const Children = styled.div``;
-
-const ChildCellContainer = styled.div`
-  display: flex;
-  align-items: center;
-`;
-
-const ChildCellImg = styled.img`
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-right: 10px;
-`;
-
-const ButtonEdit = styled.button`
-  border: 1px solid #3bb077;
-  border-radius: 10px;
-  padding: 5px 10px;
-  cursor: pointer;
-  background-color: white;
-  margin: auto;
-`;
-
-const ProfileTopContainer = styled.div`
-  display: flex;
-`;
-
-const Profile = () => {
+const ChildProfile = () => {
+  const location = useLocation();
+  const userId = location.pathname.split('/')[2];
   const currentUser = useSelector((state) => state.login?.currentUser);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [user, setUser] = useState({});
-  const [selectedChildren, setSelectedChildren] = useState([]);
-  const [isRemovingChildren, setIsRemovingChildren] = useState(false);
+  const navigate = useNavigate();
 
   const openUpdateModal = (e) => {
     e.preventDefault();
@@ -177,7 +137,7 @@ const Profile = () => {
 
   useEffect(() => {
     openRequest
-      .get(`/user/${currentUser._id}`, setAuthToken(currentUser?.accessToken))
+      .get(`/user/${userId}`, setAuthToken(currentUser?.accessToken))
       .then((result) => {
         setUser(result.data);
       })
@@ -187,112 +147,7 @@ const Profile = () => {
           : err.message;
         toast.error(message);
       });
-  }, [currentUser]);
-
-  const handleRemoveChildrenEvent = (e) => {
-    e.preventDefault();
-    const payload = {
-      parentId: currentUser._id,
-      childrenIds: selectedChildren,
-    };
-    setIsRemovingChildren(true);
-    openRequest
-      .post(
-        '/user/remove/children',
-        payload,
-        setAuthToken(currentUser.accessToken)
-      )
-      .then((result) => {
-        setIsRemovingChildren(false);
-        toast.success('Children removed successfully');
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
-      })
-      .catch((err) => {
-        setIsRemovingChildren(false);
-        let message = err.response?.data?.message
-          ? err.response?.data?.message
-          : err.message;
-        toast.error(message);
-      });
-  };
-
-  const rows = user?.children?.length
-    ? Object.entries(user.children).map(([k, v]) => {
-        return {
-          ...v,
-          id: user.children[k]._id,
-        };
-      })
-    : [];
-
-  const columns = [
-    {
-      field: '_id',
-      headerName: 'ID',
-      width: 250,
-    },
-    {
-      field: 'name',
-      headerName: 'Name',
-      width: 250,
-      renderCell: (params) => {
-        return (
-          <ChildCellContainer>
-            <ChildCellImg
-              src={
-                params.row.image ||
-                'https://crowd-literature.eu/wp-content/uploads/2015/01/no-avatar.gif'
-              }
-              alt='user image'
-            />
-            {params.row.firstName} {params.row.lastName.toUpperCase()}
-          </ChildCellContainer>
-        );
-      },
-    },
-    {
-      field: 'username',
-      headerName: 'Username',
-      width: 250,
-    },
-    {
-      field: 'age',
-      headerName: 'Age',
-      width: 220,
-      renderCell: (params) => {
-        return (
-          <span>
-            {calculateAge(params.row.dateOfBirth)}
-            {' years'}
-          </span>
-        );
-      },
-    },
-    {
-      field: 'gender',
-      headerName: 'Gender',
-      width: 220,
-    },
-    {
-      field: 'action',
-      headerName: 'Actions',
-      width: 210,
-      renderCell: (params) => {
-        return (
-          <>
-            <Link to={`/profile/${params.row._id}`}>
-              <ButtonEdit>
-                <FontAwesomeIcon icon={faEye} style={{ color: '#3bb077' }} />{' '}
-                View
-              </ButtonEdit>
-            </Link>
-          </>
-        );
-      },
-    },
-  ];
+  }, [userId, currentUser]);
 
   return (
     <>
@@ -312,7 +167,10 @@ const Profile = () => {
         <Sidebar />
         <ProfileContainer>
           <ProfileTitleContainer>
-            <ProfileTitle>Profile</ProfileTitle>
+              <ProfileTitle>Profile</ProfileTitle>
+              <ButtonDelete onClick={() => navigate(-1)}>
+                <FontAwesomeIcon icon={faAngleLeft} /> Back
+              </ButtonDelete>
           </ProfileTitleContainer>
 
           <ProfileTopContainer>
@@ -461,35 +319,6 @@ const Profile = () => {
               <WidgetSm title='Parents' data={user?.parents} />
             ) : null}
           </ProfileTopContainer>
-          <RemoveChildrenButtonContainer>
-            {selectedChildren.length ? (
-              <ButtonDelete onClick={handleRemoveChildrenEvent}>
-                REMOVE ({selectedChildren.length}) SELECTED
-                {isRemovingChildren ? (
-                  <FontAwesomeIcon icon={faSpinner} spin />
-                ) : null}
-              </ButtonDelete>
-            ) : null}
-          </RemoveChildrenButtonContainer>
-
-          {user.children?.length ? (
-            <ChildrenContainer>
-              <ChildrenTitle>Children</ChildrenTitle>
-              <Children>
-                <DataGrid
-                  rows={rows}
-                  columns={columns}
-                  autoHeight
-                  checkboxSelection
-                  pageSize={5}
-                  rowsPerPageOptions={[5, 10]}
-                  onSelectionModelChange={(ids) => {
-                    setSelectedChildren(ids);
-                  }}
-                />
-              </Children>
-            </ChildrenContainer>
-          ) : null}
         </ProfileContainer>
 
         <UpdateProfileModal
@@ -502,4 +331,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default ChildProfile;

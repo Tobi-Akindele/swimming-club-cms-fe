@@ -6,6 +6,7 @@ import {
   Navigate,
 } from 'react-router-dom';
 import './App.css';
+import ChildProfile from './pages/childProfile/ChildrenProfile';
 import Club from './pages/club/Club';
 import Clubs from './pages/clubs/Clubs';
 import Competition from './pages/competition/Competition';
@@ -97,6 +98,10 @@ const App = () => {
         <Route
           path='/profile'
           element={currentUser ? <Profile /> : <Navigate to='/' />}
+        />
+        <Route
+          path='/profile/:childId'
+          element={currentUser ? <ChildProfile /> : <Navigate to='/' />}
         />
         <Route path='/set-password/:activationCode' element={<SetPassword />} />
       </Routes>
