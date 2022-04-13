@@ -1,13 +1,10 @@
 import { faSpinner, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FieldArray, Form, Formik } from 'formik';
-import React, { useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { toast, ToastContainer } from 'react-toastify';
+import React, { useRef } from 'react';
+import { ToastContainer } from 'react-toastify';
 import styled from 'styled-components';
-import { openRequest } from '../../apiRequests';
 import * as Yup from 'yup';
-import { setAuthToken } from '../../utils';
 import TextField from '../formComponents/TextField';
 
 const Background = styled.div`
@@ -99,10 +96,15 @@ const ResultContainerRight = styled.div`
   margin: 0px 10px;
 `;
 
-const EventResultModal = ({ showModal, setShowModal, participants, event }) => {
+const ResultModal = ({
+  showModal,
+  setShowModal,
+  participants,
+  resultName,
+  onSubmit,
+  submitting,
+}) => {
   const modalRef = useRef();
-  const currentUser = useSelector((state) => state.login?.currentUser);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const closeModal = (e) => {
     if (modalRef.current === e.target) {
@@ -156,7 +158,7 @@ const EventResultModal = ({ showModal, setShowModal, participants, event }) => {
           <ModalWrapper showModal={showModal}>
             <ModalContentTop>
               <ModalContentTopTitle>
-                Record Results ({event.name})
+                Record Results ({resultName})
               </ModalContentTopTitle>
             </ModalContentTop>
 
@@ -164,34 +166,9 @@ const EventResultModal = ({ showModal, setShowModal, participants, event }) => {
               <Formik
                 initialValues={{ results: participantResults }}
                 validationSchema={validate}
-                onSubmit={(values, { resetForm }) => {
-                  const payload = {
-                    eventId: event._id,
-                    ...values,
-                  };
-                  setIsSubmitting(true);
-                  openRequest
-                    .post(
-                      '/event/results',
-                      payload,
-                      setAuthToken(currentUser.accessToken)
-                    )
-                    .then((result) => {
-                      setIsSubmitting(false);
-                      resetForm({});
-                      toast.success('Results recorded successfully');
-                      setTimeout(() => {
-                        window.location.reload();
-                      }, 2000);
-                    })
-                    .catch((err) => {
-                      setIsSubmitting(false);
-                      let message = err.response?.data?.message
-                        ? err.response?.data?.message
-                        : err.message;
-                      toast.error(message);
-                    });
-                }}
+                onSubmit={(values, { resetForm }) =>
+                  onSubmit(values, { resetForm })
+                }
               >
                 {({ values, isValid }) => (
                   <Form style={{ width: '100%' }}>
@@ -233,10 +210,10 @@ const EventResultModal = ({ showModal, setShowModal, participants, event }) => {
                     <ButtonContainer>
                       <ButtonUpdate
                         type='submit'
-                        disabled={!isValid || isSubmitting}
+                        disabled={!isValid || submitting}
                       >
                         SUBMIT{' '}
-                        {isSubmitting && (
+                        {submitting && (
                           <FontAwesomeIcon icon={faSpinner} spin />
                         )}
                       </ButtonUpdate>
@@ -258,4 +235,4 @@ const EventResultModal = ({ showModal, setShowModal, participants, event }) => {
   );
 };
 
-export default EventResultModal;
+export default ResultModal;

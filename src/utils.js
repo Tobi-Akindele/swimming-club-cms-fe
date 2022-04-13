@@ -18,7 +18,7 @@ export const setAuthToken = (accessToken) => {
 };
 
 export const filterArray = (array = [], filter = []) => {
-  if (filter.length === 0) {
+  if (!filter || filter?.length === 0) {
     return array;
   }
   return array.filter((a) => !filter.map((b) => b._id).includes(a._id));

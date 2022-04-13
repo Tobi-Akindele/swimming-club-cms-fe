@@ -22,6 +22,7 @@ import Profile from './pages/profile/Profile';
 import Role from './pages/role/Role';
 import Roles from './pages/roles/Roles';
 import SetPassword from './pages/setPassword/SetPassword';
+import TrainingData from './pages/trainingData/TrainingData';
 import User from './pages/user/User';
 import Users from './pages/users/Users';
 import UserTypes from './pages/userTypes/UserTypes';
@@ -90,6 +91,10 @@ const App = () => {
         <Route
           path='/club/:clubId'
           element={currentUser ? <Club /> : <Navigate to='/' />}
+        />
+        <Route
+          path='/club/:clubId/training-data/:trainingDataId'
+          element={currentUser ? <TrainingData /> : <Navigate to='/' />}
         />
         <Route
           path='/create/club'

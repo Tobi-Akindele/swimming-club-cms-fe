@@ -37,7 +37,12 @@ const FeaturedDataDesc = styled.span`
   color: gray;
 `;
 
-const FeaturedInfo = () => {
+const FeaturedInfo = ({
+  totalUsers,
+  totalClubs,
+  totalCompetitions,
+  totalOpenCompetitions,
+}) => {
   const formatter = new Intl.NumberFormat('en', {
     notation: 'compact',
   });
@@ -47,28 +52,28 @@ const FeaturedInfo = () => {
       <FeaturedItem>
         <FeaturedTitle>Total Users</FeaturedTitle>
         <FeaturedDataContainer>
-          <FeaturedData>{formatter.format(1293)}</FeaturedData>
+          <FeaturedData>{formatter.format(totalUsers)}</FeaturedData>
         </FeaturedDataContainer>
         <FeaturedDataDesc>Current registered users</FeaturedDataDesc>
       </FeaturedItem>
       <FeaturedItem>
         <FeaturedTitle>Total Clubs</FeaturedTitle>
         <FeaturedDataContainer>
-          <FeaturedData>{formatter.format(41599)}</FeaturedData>
+          <FeaturedData>{formatter.format(totalClubs)}</FeaturedData>
         </FeaturedDataContainer>
         <FeaturedDataDesc>Current registered clubs</FeaturedDataDesc>
       </FeaturedItem>
       <FeaturedItem>
         <FeaturedTitle>Total Competitions</FeaturedTitle>
         <FeaturedDataContainer>
-          <FeaturedData>{formatter.format(1800)}</FeaturedData>
+          <FeaturedData>{formatter.format(totalCompetitions)}</FeaturedData>
         </FeaturedDataContainer>
         <FeaturedDataDesc>All-time no of competitions</FeaturedDataDesc>
       </FeaturedItem>
       <FeaturedItem>
         <FeaturedTitle>Open Competitions</FeaturedTitle>
         <FeaturedDataContainer>
-          <FeaturedData>{formatter.format(568)}</FeaturedData>
+          <FeaturedData>{formatter.format(totalOpenCompetitions)}</FeaturedData>
         </FeaturedDataContainer>
         <FeaturedDataDesc>Current active competitions</FeaturedDataDesc>
       </FeaturedItem>

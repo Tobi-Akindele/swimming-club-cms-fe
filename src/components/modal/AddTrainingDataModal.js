@@ -8,7 +8,7 @@ import styled from 'styled-components';
 import { openRequest } from '../../apiRequests';
 import * as Yup from 'yup';
 import { setAuthToken } from '../../utils';
-import DataListInput from '../formComponents/DataListInput';
+import TextField from '../formComponents/TextField';
 
 const Background = styled.div`
   width: 100%;
@@ -75,10 +75,10 @@ const ButtonUpdate = styled.button`
   }
 `;
 
-const AddClubMemberModal = ({ showModal, setShowModal, clubId }) => {
+const AddTrainingDataModal = ({ showModal, setShowModal, clubId }) => {
   const modalRef = useRef();
   const currentUser = useSelector((state) => state.login?.currentUser);
-  const [registering, setRegistering] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
   const closeModal = (e) => {
     if (modalRef.current === e.target) {
@@ -87,28 +87,10 @@ const AddClubMemberModal = ({ showModal, setShowModal, clubId }) => {
   };
 
   const validate = Yup.object({
-    userId: Yup.string().required('Value is required'),
+    name: Yup.string()
+      .min(3, 'Too short')
+      .required('Training name is required'),
   });
-
-  const loadOptions = async (inputText, callback) => {
-    let config = {
-      headers: {
-        username: inputText,
-        userType: 'swimmer',
-      },
-    };
-    try {
-      const response = await openRequest.get('/users/search/type', config);
-      const json = await response.data;
-
-      callback(
-        json.map((item) => ({
-          label: `${item.username} (${item.firstName} ${item.lastName})`,
-          value: item._id,
-        }))
-      );
-    } catch (error) {}
-  };
 
   return (
     <>
@@ -127,35 +109,35 @@ const AddClubMemberModal = ({ showModal, setShowModal, clubId }) => {
         <Background onClick={closeModal} ref={modalRef}>
           <ModalWrapper showModal={showModal}>
             <ModalContentTop>
-              <ModalContentTopTitle>Member Registration</ModalContentTopTitle>
+              <ModalContentTopTitle>Create Training</ModalContentTopTitle>
             </ModalContentTop>
 
             <ModalContentBottom>
               <Formik
-                initialValues={{ userId: '' }}
+                initialValues={{ name: '' }}
                 validationSchema={validate}
                 onSubmit={(values, { resetForm }) => {
                   const payload = {
+                    ...values,
                     clubId: clubId,
-                    memberId: values.userId,
                   };
-                  setRegistering(true);
+                  setIsCreating(true);
                   openRequest
                     .post(
-                      '/club/add/member',
+                      '/training-data',
                       payload,
                       setAuthToken(currentUser.accessToken)
                     )
                     .then((result) => {
-                      setRegistering(false);
+                      setIsCreating(false);
                       resetForm({});
-                      toast.success('Registration successful');
+                      toast.success('Training created successfully');
                       setTimeout(() => {
                         window.location.reload();
                       }, 2000);
                     })
                     .catch((err) => {
-                      setRegistering(false);
+                      setIsCreating(false);
                       let message = err.response?.data?.message
                         ? err.response?.data?.message
                         : err.message;
@@ -165,28 +147,22 @@ const AddClubMemberModal = ({ showModal, setShowModal, clubId }) => {
               >
                 {(formik) => (
                   <Form>
-                    <DataListInput
-                      value={formik.values.userId}
-                      name='userId'
+                    <TextField
+                      name='name'
                       type='text'
-                      placeholder='Search Swimmers'
-                      label='Member Name'
-                      onChange={formik.setFieldValue}
-                      onBlur={formik.setFieldTouched}
-                      loadOptions={loadOptions}
-                      error={formik.errors.userId}
-                      touched={formik.touched.userId}
+                      placeholder='Training name'
+                      label='Name'
                       width='350px'
                     />
                     <ButtonContainer>
                       <ButtonUpdate
                         type='submit'
                         disabled={
-                          !formik.dirty || !formik.isValid || registering
+                          !formik.dirty || !formik.isValid || isCreating
                         }
                       >
-                        REGISTER{' '}
-                        {registering && (
+                        SUBMIT{' '}
+                        {isCreating && (
                           <FontAwesomeIcon icon={faSpinner} spin />
                         )}
                       </ButtonUpdate>
@@ -208,4 +184,4 @@ const AddClubMemberModal = ({ showModal, setShowModal, clubId }) => {
   );
 };
 
-export default AddClubMemberModal;
+export default AddTrainingDataModal;

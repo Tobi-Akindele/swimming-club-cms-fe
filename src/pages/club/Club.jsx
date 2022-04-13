@@ -2,22 +2,27 @@ import {
   faAngleLeft,
   faSpinner,
   faPenToSquare,
+  faBars,
+  faEye,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DataGrid } from '@mui/x-data-grid';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router';
+import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import styled from 'styled-components';
 import { format } from 'timeago.js';
 import { openRequest } from '../../apiRequests';
 import SearchInput from '../../components/formComponents/SearchInput';
 import AddClubMemberModal from '../../components/modal/AddClubMemberModal';
+import AddTrainingDataModal from '../../components/modal/AddTrainingDataModal';
 import UpdateClubModal from '../../components/modal/UpdateClub';
 import Sidebar from '../../components/sidebar/Sidebar';
 import Topbar from '../../components/topbar/Topbar';
 import { calculateAge, setAuthToken } from '../../utils';
+import './club.css';
 
 const Container = styled.div`
   display: flex;
@@ -100,19 +105,6 @@ const AddMemberContainer = styled.div`
   justify-content: flex-end;
 `;
 
-const ButtonCreate = styled.button`
-  border: none;
-  padding: 10px;
-  background-color: #79a5d9;
-  margin: 0px 10px;
-  cursor: pointer;
-  color: white;
-  font-size: 15px;
-  &:disabled {
-    cursor: not-allowed;
-  }
-`;
-
 const ButtonDelete = styled.button`
   border: none;
   padding: 10px;
@@ -126,18 +118,19 @@ const ButtonDelete = styled.button`
   }
 `;
 
-const MembersContainer = styled.div`
+const DataGridContainer = styled.div`
   flex-direction: column;
   padding: 20px;
   -webkit-box-shadow: 0px 0px 15px -10px rgba(0, 0, 0, 0.75);
   box-shadow: 0px 0px 15px -10px rgba(0, 0, 0, 0.75);
+  margin: 15px 0px;
 `;
 
 const MemberTitle = styled.h2``;
 
-const Members = styled.div``;
+const Data = styled.div``;
 
-const MemberTopContainer = styled.div`
+const DataGridTopContainer = styled.div`
   display: flex;
   justify-content: space-between;
   margin: 10px 0px;
@@ -156,6 +149,14 @@ const MemberCellImg = styled.img`
   margin-right: 10px;
 `;
 
+const ButtonEdit = styled.button`
+  border: 1px solid #3bb077;
+  border-radius: 10px;
+  padding: 5px 10px;
+  cursor: pointer;
+  background-color: white;
+`;
+
 const Club = () => {
   const location = useLocation();
   const clubId = location.pathname.split('/')[2];
@@ -166,29 +167,33 @@ const Club = () => {
   const [query, setQuery] = useState('');
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
-  const [selectedRows, setSelectedRows] = useState([]);
+  const [showAddTrainingDataModal, setShowAddTrainingDataModal] =
+    useState(false);
+  const [selectedMembers, setSelectedMembers] = useState([]);
   const [members, setMembers] = useState([]);
+  const [trainingData, setTrainingData] = useState([]);
   const [coach, setCoach] = useState([]);
   const [coachUserType, setCoachUserType] = useState({});
-  const [isFetchingMembers, setIsFetchingMembers] = useState(false);
+  const [isFetchingClub, setIsFetchingClub] = useState(false);
   const { isFetching: isDeleting } = useSelector((state) => state.club);
   const navigate = useNavigate();
 
   useEffect(() => {
-    setIsFetchingMembers(true);
+    setIsFetchingClub(true);
     openRequest
       .get(`/club/${clubId}`, setAuthToken(currentUser.accessToken))
       .then((result) => {
-        setIsFetchingMembers(false);
+        setIsFetchingClub(false);
         setMembers(result.data?.members);
         setCoach(result.data?.coach);
+        setTrainingData(result.data?.trainingData);
       })
       .catch((err) => {
         let message = err.response?.data?.message
           ? err.response?.data?.message
           : err.message;
         toast.error(message);
-        setIsFetchingMembers(false);
+        setIsFetchingClub(false);
       });
   }, [currentUser, clubId]);
 
@@ -207,14 +212,20 @@ const Club = () => {
   }, [currentUser, coach]);
 
   const keys = ['firstName', 'lastName', 'gender', 'username'];
-  const search = (data) => {
+  const searchWithKeys = (data) => {
     return data.filter((item) =>
       keys.some((key) => item[key].toLowerCase().includes(query.toLowerCase()))
     );
   };
 
-  const rows = members?.length
-    ? Object.entries(search(members)).map(([k, v]) => {
+  const search = (data) => {
+    return data.filter((item) =>
+      item.name.toLowerCase().includes(query.toLowerCase())
+    );
+  };
+
+  const memberData = members?.length
+    ? Object.entries(searchWithKeys(members)).map(([k, v]) => {
         return {
           ...v,
           id: members[k]._id,
@@ -222,7 +233,7 @@ const Club = () => {
       })
     : [];
 
-  const columns = [
+  const memberColumns = [
     {
       field: '_id',
       headerName: 'ID',
@@ -272,7 +283,68 @@ const Club = () => {
     },
   ];
 
-  const openAddParticipantModal = (e) => {
+  const trainings = trainingData?.length
+    ? Object.entries(search(trainingData)).map(([k, v]) => {
+        return {
+          ...v,
+          id: trainingData[k]._id,
+        };
+      })
+    : [];
+
+  const trainingsColumns = [
+    {
+      field: '_id',
+      headerName: 'ID',
+      width: 250,
+    },
+    {
+      field: 'name',
+      headerName: 'Name',
+      width: 250,
+    },
+    {
+      field: 'participants',
+      headerName: 'No of Participants',
+      width: 250,
+      renderCell: (params) => {
+        return (
+          <span>
+            {params.row?.participants?.length
+              ? params.row?.participants?.length
+              : 0}
+          </span>
+        );
+      },
+    },
+    {
+      field: '_created',
+      headerName: 'Created',
+      width: 250,
+      renderCell: (params) => {
+        return <span>{format(params.row._created)}</span>;
+      },
+    },
+    {
+      field: 'action',
+      headerName: 'Actions',
+      width: 250,
+      renderCell: (params) => {
+        return (
+          <>
+            <Link to={`/club/${clubId}/training-data/${params.row._id}`}>
+              <ButtonEdit>
+                <FontAwesomeIcon icon={faEye} style={{ color: '#3bb077' }} />{' '}
+                View
+              </ButtonEdit>
+            </Link>
+          </>
+        );
+      },
+    },
+  ];
+
+  const openAddMemberModal = (e) => {
     e.preventDefault();
     setShowAddMemberModal((prev) => !prev);
   };
@@ -282,11 +354,16 @@ const Club = () => {
     setShowUpdateModal((prev) => !prev);
   };
 
-  const handleDeleteEvent = (e) => {
+  const openAddTrainingDataModal = (e) => {
+    e.preventDefault();
+    setShowAddTrainingDataModal((prev) => !prev);
+  };
+
+  const handleDeleteMember = (e) => {
     e.preventDefault();
     const payload = {
       clubId: clubId,
-      memberIds: selectedRows,
+      memberIds: selectedMembers,
     };
     openRequest
       .post(
@@ -359,20 +436,31 @@ const Club = () => {
           </ClubDetailContainer>
 
           <AddMemberContainer>
-            {selectedRows.length ? (
-              <ButtonDelete onClick={handleDeleteEvent}>
-                REMOVE ({selectedRows.length}) SELECTED
+            {selectedMembers.length ? (
+              <ButtonDelete onClick={handleDeleteMember}>
+                REMOVE ({selectedMembers.length}) SELECTED
                 {isDeleting ? <FontAwesomeIcon icon={faSpinner} spin /> : null}
               </ButtonDelete>
             ) : null}
 
-            <ButtonCreate onClick={openAddParticipantModal}>
-              ADD MEMBER
-            </ButtonCreate>
+            <div class='dropdown' style={{ float: 'right' }}>
+              <FontAwesomeIcon
+                icon={faBars}
+                fontSize='40px'
+                cursor={'pointer'}
+                className={'dropbtn'}
+              />
+              <div class='dropdown-content'>
+                <button onClick={openAddMemberModal}>Add Member</button>
+                <button onClick={openAddTrainingDataModal}>
+                  Add Training Data
+                </button>
+              </div>
+            </div>
           </AddMemberContainer>
 
-          <MembersContainer>
-            <MemberTopContainer>
+          <DataGridContainer>
+            <DataGridTopContainer>
               <MemberTitle>Members</MemberTitle>
               <SearchInput
                 type='text'
@@ -380,9 +468,9 @@ const Club = () => {
                 onChange={(e) => setQuery(e.target.value)}
                 width='300px'
               />
-            </MemberTopContainer>
-            <Members>
-              {isFetchingMembers ? (
+            </DataGridTopContainer>
+            <Data>
+              {isFetchingClub ? (
                 <FontAwesomeIcon
                   icon={faSpinner}
                   spin
@@ -390,8 +478,8 @@ const Club = () => {
                 />
               ) : (
                 <DataGrid
-                  rows={rows}
-                  columns={columns}
+                  rows={memberData}
+                  columns={memberColumns}
                   initialState={{
                     sorting: {
                       sortModel: [{ field: '_created', sort: 'desc' }],
@@ -402,12 +490,50 @@ const Club = () => {
                   pageSize={5}
                   rowsPerPageOptions={[5, 10]}
                   onSelectionModelChange={(ids) => {
-                    setSelectedRows(ids);
+                    setSelectedMembers(ids);
                   }}
                 />
               )}
-            </Members>
-          </MembersContainer>
+            </Data>
+          </DataGridContainer>
+
+          <DataGridContainer>
+            <DataGridTopContainer>
+              <MemberTitle>Training Data</MemberTitle>
+              <SearchInput
+                type='text'
+                placeholder='Search'
+                onChange={(e) => setQuery(e.target.value)}
+                width='300px'
+              />
+            </DataGridTopContainer>
+            <Data>
+              {isFetchingClub ? (
+                <FontAwesomeIcon
+                  icon={faSpinner}
+                  spin
+                  style={{ fontSize: '50px' }}
+                />
+              ) : (
+                <DataGrid
+                  rows={trainings}
+                  columns={trainingsColumns}
+                  initialState={{
+                    sorting: {
+                      sortModel: [{ field: '_created', sort: 'desc' }],
+                    },
+                  }}
+                  autoHeight
+                  checkboxSelection
+                  pageSize={5}
+                  rowsPerPageOptions={[5, 10]}
+                  onSelectionModelChange={(ids) => {
+                    setSelectedMembers(ids);
+                  }}
+                />
+              )}
+            </Data>
+          </DataGridContainer>
         </ClubContainer>
 
         {/* Modals */}
@@ -421,6 +547,11 @@ const Club = () => {
           setShowModal={setShowUpdateModal}
           club={club}
           coach={coach}
+        />
+        <AddTrainingDataModal
+          showModal={showAddTrainingDataModal}
+          setShowModal={setShowAddTrainingDataModal}
+          clubId={clubId}
         />
       </Container>
     </>
