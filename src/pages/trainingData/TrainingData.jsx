@@ -1,9 +1,7 @@
 import { faAngleLeft, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DataGrid } from '@mui/x-data-grid';
-import moment from 'moment';
-import { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
@@ -11,15 +9,10 @@ import styled from 'styled-components';
 import { format } from 'timeago.js';
 import { openRequest } from '../../apiRequests';
 import SearchInput from '../../components/formComponents/SearchInput';
-import AddParticipantModal from '../../components/modal/AddParticipantModal';
+import AddTDPModal from '../../components/modal/AddTDPModal';
 import ResultModal from '../../components/modal/EventResultModal';
 import Sidebar from '../../components/sidebar/Sidebar';
 import Topbar from '../../components/topbar/Topbar';
-import {
-  deleteEventParticipantFailure,
-  deleteEventParticipantStart,
-  deleteEventParticipantSuccess,
-} from '../../redux/competitionRedux';
 import { calculateAge, setAuthToken } from '../../utils';
 
 const Container = styled.div`
@@ -27,41 +20,54 @@ const Container = styled.div`
   margin-top: 5px;
 `;
 
-const EventContainer = styled.div`
+const TDContainer = styled.div`
   flex: 4;
   padding: 0px 20px;
 `;
 
-const EventTitleContainer = styled.div`
+const TDTitleContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 10px;
 `;
 
-const EventTitle = styled.h1``;
+const TDTitle = styled.h1``;
 
-const EventDetailContainer = styled.div`
+const ButtonBack = styled.button`
+  border: none;
+  padding: 10px;
+  background-color: red;
+  margin: 0px 10px;
+  cursor: pointer;
+  color: white;
+  font-size: 15px;
+  &:disabled {
+    cursor: not-allowed;
+  }
+`;
+
+const TDDetailContainer = styled.div`
   flex-direction: column;
   padding: 20px;
   -webkit-box-shadow: 0px 0px 15px -10px rgba(0, 0, 0, 0.75);
   box-shadow: 0px 0px 15px -10px rgba(0, 0, 0, 0.75);
 `;
 
-const EventDetailTitle = styled.span`
+const TDDetailTitle = styled.span`
   font-size: 14px;
   font-weight: 600;
   color: rgb(175, 170, 170);
 `;
 
-const EventDetailInfo = styled.div`
+const TDDetailInfo = styled.div`
   display: flex;
   align-items: center;
   margin: 20px 0px;
   color: #444;
 `;
 
-const EventDetailText = styled.span`
+const TDDetailText = styled.span`
   margin-left: 10px;
 `;
 
@@ -84,19 +90,6 @@ const ButtonCreate = styled.button`
   }
 `;
 
-const ButtonDelete = styled.button`
-  border: none;
-  padding: 10px;
-  background-color: red;
-  margin: 0px 10px;
-  cursor: pointer;
-  color: white;
-  font-size: 15px;
-  &:disabled {
-    cursor: not-allowed;
-  }
-`;
-
 const ParticipantsContainer = styled.div`
   flex-direction: column;
   padding: 20px;
@@ -104,15 +97,15 @@ const ParticipantsContainer = styled.div`
   box-shadow: 0px 0px 15px -10px rgba(0, 0, 0, 0.75);
 `;
 
-const ParticipantTitle = styled.h2``;
-
-const Pariticipants = styled.div``;
-
 const ParticipantTopContainer = styled.div`
   display: flex;
   justify-content: space-between;
   margin: 10px 0px;
 `;
+
+const ParticipantTitle = styled.h2``;
+
+const Pariticipants = styled.div``;
 
 const UserCellContainer = styled.div`
   display: flex;
@@ -127,46 +120,38 @@ const UserCellImg = styled.img`
   margin-right: 10px;
 `;
 
-const Event = () => {
+const TrainingData = () => {
   const location = useLocation();
-  const dispatch = useDispatch();
-  const competitionId = location.pathname.split('/')[2];
-  const eventId = location.pathname.split('/')[4];
-  const competition = useSelector((state) =>
-    state.competition.competitions.find(
-      (competition) => competition._id === competitionId
-    )
-  );
-  const event = competition?.events.find((event) => event._id === eventId);
+  const navigate = useNavigate();
+  const clubId = location.pathname.split('/')[2];
+  const trainingDataId = location.pathname.split('/')[4];
   const currentUser = useSelector((state) => state.login?.currentUser);
+  const [trainingData, setTrainingData] = useState({});
+  const [isFetchingTD, setIsFetchingTD] = useState(false);
   const [query, setQuery] = useState('');
   const [showAddParticipantModal, setShowAddParticipantModal] = useState(false);
   const [showRecordResultModal, setShowRecordResultModal] = useState(false);
-  const [selectedRows, setSelectedRows] = useState([]);
-  const [participants, setParticipants] = useState([]);
-  const [results, setResults] = useState([]);
-  const [isFetchingParticipants, setIsFetchingParticipants] = useState(false);
-  const { isFetching: isDeleting } = useSelector((state) => state.competition);
-  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    setIsFetchingParticipants(true);
+    setIsFetchingTD(true);
     openRequest
-      .get(`/event/${eventId}`, setAuthToken(currentUser.accessToken))
+      .get(
+        `/training-data/${trainingDataId}`,
+        setAuthToken(currentUser.accessToken)
+      )
       .then((result) => {
-        setIsFetchingParticipants(false);
-        setParticipants(result.data?.participants);
-        setResults(result.data?.results);
+        setIsFetchingTD(false);
+        setTrainingData(result.data);
       })
       .catch((err) => {
         let message = err.response?.data?.message
           ? err.response?.data?.message
           : err.message;
         toast.error(message);
-        setIsFetchingParticipants(false);
+        setIsFetchingTD(false);
       });
-  }, [currentUser, eventId]);
+  }, [currentUser, trainingDataId]);
 
   const keys = ['firstName', 'lastName', 'gender', 'username'];
   const search = (data) => {
@@ -175,11 +160,11 @@ const Event = () => {
     );
   };
 
-  const rows = participants?.length
-    ? Object.entries(search(participants)).map(([k, v]) => {
+  const rows = trainingData?.participants?.length
+    ? Object.entries(search(trainingData?.participants)).map(([k, v]) => {
         return {
           ...v,
-          id: participants[k]._id,
+          id: trainingData?.participants[k]._id,
         };
       })
     : [];
@@ -208,18 +193,6 @@ const Event = () => {
       field: 'username',
       headerName: 'Username',
       width: 200,
-    },
-    {
-      field: 'club',
-      headerName: 'Club',
-      width: 200,
-      renderCell: (params) => {
-        return (
-          <span>
-            {params.row.club?.name?.length ? params.row.club?.name : 'nil'}
-          </span>
-        );
-      },
     },
     {
       field: 'age',
@@ -261,48 +234,18 @@ const Event = () => {
     setShowRecordResultModal((prev) => !prev);
   };
 
-  const handleDeleteEvent = (e) => {
-    e.preventDefault();
-    const payload = {
-      eventId: eventId,
-      participantIds: selectedRows,
-    };
-    dispatch(deleteEventParticipantStart());
-    openRequest
-      .post(
-        '/remove/participants',
-        payload,
-        setAuthToken(currentUser.accessToken)
-      )
-      .then((result) => {
-        const updateEvent = {
-          ...result.data,
-          competitionId: competitionId,
-          eventId: eventId,
-        };
-        dispatch(deleteEventParticipantSuccess(updateEvent));
-        toast.success('Event(s) deleted successfully');
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
-      })
-      .catch((err) => {
-        dispatch(deleteEventParticipantFailure());
-        let message = err.response?.data?.message
-          ? err.response?.data?.message
-          : err.message;
-        toast.error(message);
-      });
-  };
-
   const onSubmit = (values, { resetForm }) => {
     const payload = {
-      eventId: event._id,
+      trainingDataId: trainingData._id,
       ...values,
     };
     setIsSubmitting(true);
     openRequest
-      .post('/event/results', payload, setAuthToken(currentUser.accessToken))
+      .post(
+        '/training-data/results',
+        payload,
+        setAuthToken(currentUser.accessToken)
+      )
       .then((result) => {
         setIsSubmitting(false);
         resetForm({});
@@ -325,56 +268,49 @@ const Event = () => {
       <Topbar wMessage={false} />
       <Container>
         <Sidebar />
-        <EventContainer>
-          <EventTitleContainer>
-            <EventTitle>Event</EventTitle>
-            <ButtonDelete onClick={() => navigate(-1)}>
+        <TDContainer>
+          <TDTitleContainer>
+            <TDTitle>Training Data</TDTitle>
+            <ButtonBack onClick={() => navigate(-1)}>
               <FontAwesomeIcon icon={faAngleLeft} /> Back
-            </ButtonDelete>
-          </EventTitleContainer>
-          <EventDetailContainer>
-            <EventDetailTitle>Event Details</EventDetailTitle>
-            <EventDetailInfo>
-              Name:
-              <EventDetailText>{event.name}</EventDetailText>
-            </EventDetailInfo>
-            <EventDetailInfo>
-              Created:
-              <EventDetailText>{format(event._created)}</EventDetailText>
-            </EventDetailInfo>
-            <EventDetailInfo>
-              Registered Participants:
-              <EventDetailText>
-                {participants ? participants?.length : 0}
-              </EventDetailText>
-            </EventDetailInfo>
-          </EventDetailContainer>
+            </ButtonBack>
+          </TDTitleContainer>
+
+          <TDDetailContainer>
+            <TDDetailTitle>Training Data Details</TDDetailTitle>
+
+            <TDDetailInfo>
+              Name: <TDDetailText>{trainingData?.name}</TDDetailText>
+            </TDDetailInfo>
+            <TDDetailInfo>
+              Created:{' '}
+              <TDDetailText>{format(trainingData?._created)}</TDDetailText>
+            </TDDetailInfo>
+            <TDDetailInfo>
+              No of Participants:{' '}
+              <TDDetailText>
+                {trainingData?.participants?.length
+                  ? trainingData?.participants?.length
+                  : 0}
+              </TDDetailText>
+            </TDDetailInfo>
+          </TDDetailContainer>
 
           <AddParticipantContainer>
-            {selectedRows.length && !results?.length ? (
-              <ButtonDelete onClick={handleDeleteEvent}>
-                REMOVE ({selectedRows.length}) SELECTED
-                {isDeleting ? <FontAwesomeIcon icon={faSpinner} spin /> : null}
-              </ButtonDelete>
-            ) : null}
-            {moment(competition.date).isAfter(new Date()) &&
-            !results?.length ? (
+            {!trainingData?.results?.length ? (
               <ButtonCreate onClick={openAddParticipantModal}>
-                {currentUser.admin ? 'ADD PARTICIPANT' : 'PARTICIPATE'}
+                ADD PARTICIPANT
               </ButtonCreate>
             ) : (
-              <ButtonCreate disabled>
-                {currentUser.admin ? 'ADD PARTICIPANT' : 'PARTICIPATE'}
-              </ButtonCreate>
+              <ButtonCreate disabled>ADD PARTICIPANT</ButtonCreate>
             )}
-            {/* {!results?.length && ( */}
+
             <ButtonCreate
               onClick={openRecordResultModal}
-              disabled={!participants?.length}
+              disabled={!trainingData?.participants?.length}
             >
               RECORD RESULTS
             </ButtonCreate>
-            {/* )} */}
           </AddParticipantContainer>
 
           <ParticipantsContainer>
@@ -388,7 +324,7 @@ const Event = () => {
               />
             </ParticipantTopContainer>
             <Pariticipants>
-              {isFetchingParticipants ? (
+              {isFetchingTD ? (
                 <FontAwesomeIcon
                   icon={faSpinner}
                   spin
@@ -405,27 +341,25 @@ const Event = () => {
                   }}
                   autoHeight
                   pageSize={5}
-                  checkboxSelection={!results?.length}
+                  checkboxSelection={!trainingData?.results?.length}
                   rowsPerPageOptions={[5, 10]}
-                  onSelectionModelChange={(ids) => {
-                    setSelectedRows(ids);
-                  }}
                 />
               )}
             </Pariticipants>
           </ParticipantsContainer>
-        </EventContainer>
-        <AddParticipantModal
+        </TDContainer>
+        <AddTDPModal
           showModal={showAddParticipantModal}
           setShowModal={setShowAddParticipantModal}
-          eventId={eventId}
-          competitionId={competitionId}
+          existingParticipants={trainingData?.participants}
+          trainingDataId={trainingDataId}
+          clubId={clubId}
         />
         <ResultModal
           showModal={showRecordResultModal}
           setShowModal={setShowRecordResultModal}
-          participants={participants}
-          resultName={event.name}
+          participants={trainingData?.participants}
+          resultName={trainingData?.name}
           onSubmit={onSubmit}
           submitting={isSubmitting}
           setSubmitting={setIsSubmitting}
@@ -435,4 +369,4 @@ const Event = () => {
   );
 };
 
-export default Event;
+export default TrainingData;

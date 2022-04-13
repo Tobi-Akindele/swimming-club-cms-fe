@@ -16,6 +16,7 @@ import {
 import { useDispatch } from 'react-redux';
 import { logoutFailure, logoutSuccess } from '../../redux/loginRedux';
 import { useNavigate } from 'react-router';
+import storage from 'redux-persist/lib/storage';
 
 const SidebarContainer = styled.div`
   flex: 1;
@@ -71,9 +72,11 @@ const Sidebar = () => {
   const handleLogout = (e) => {
     e.preventDefault();
     try {
-      dispatch(logoutSuccess());
+      dispatch(logoutSuccess('LOGOUT'));
+
       setTimeout(() => {
-        localStorage.removeItem('persist:root');
+        storage.removeItem('persist:root');
+        window.location.reload();
       }, 1000);
       navigate('/', { replace: true });
     } catch (error) {
@@ -125,7 +128,7 @@ const Sidebar = () => {
                   icon={faPersonSwimming}
                   title='Training Data'
                 />
-                Training Data
+                Performance Analysis
               </SidebarListItem>
             </Link>
           </SidebarList>
